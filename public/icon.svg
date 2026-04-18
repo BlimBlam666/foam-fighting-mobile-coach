@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Foam Fighter Mobile Coach icon</title>
+  <desc id="desc">A simple shield and training marker app icon placeholder.</desc>
+  <rect width="512" height="512" rx="96" fill="#0f172a"/>
+  <path d="M256 82 384 128v106c0 86-50 154-128 196-78-42-128-110-128-196V128l128-46Z" fill="#38bdf8"/>
+  <path d="M256 128 336 156v76c0 56-30 104-80 136-50-32-80-80-80-136v-76l80-28Z" fill="#f8fafc"/>
+  <path d="M182 302h148v36H182zM206 216h100v36H206z" fill="#0f172a"/>
+</svg>
