@@ -49,7 +49,21 @@ Log is where you save a session. The app shows a small Olympic metrics block wit
 
 The generic metric/result fields are still available for older logs or flexible notes.
 
-The required fields are shown first. Choose one primary mistake category so the coach can spot repeat patterns. Notes are optional. Tap `Add notes` if you want to record your biggest win and extra mistake detail.
+The required fields are shown first. Tap the small `?` next to a confusing field for a quick definition, what to enter, and an example.
+
+Choose one primary mistake category so the coach can spot repeat patterns. Notes are optional. Tap `Add notes` if you want to record your biggest win and extra mistake detail.
+
+Quick field translations:
+
+- `Attempts`: total tries.
+- `Successful reps`: tries that met the standard.
+- `Mistake category`: the repeatable issue the coach should count.
+- `Mistake detail`: optional free-text context.
+- `Metric being tracked`: what you measured.
+- `Result`: the value for that metric.
+- `Session success`: yes/no for the whole practice.
+- `Energy`: how much fuel you had, 0-10.
+- `Confidence`: how solid the skill felt, 0-10.
 
 You can also edit old logs here:
 
@@ -117,13 +131,15 @@ Import options:
 
 Plan shows the weekly training structure and lets you customize scheduling.
 
-Use one of the presets:
+The main schedule control is weekday assignment. Choose the training focus that belongs on each weekday. This controls what Home shows for the day and what Log expects after practice.
+
+Optional presets are available as starting points:
 
 - Standard Olympic split
 - Fighters Practice Wednesday
 - Full Park Sunday
 
-You can also manually remap any weekday to any training focus. This is useful when park day, travel, or sparring partners do not match the default split.
+After applying a preset, you can still remap any weekday. This is useful when park day, travel, or sparring partners do not match the default split.
 
 Each day has a focus, system, goal, required drills, and tracked metrics. The app starts on Week 1 by default. The four-week cycle builds for three weeks and then deloads at 50% workload.
 

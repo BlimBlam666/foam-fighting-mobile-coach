@@ -61,13 +61,13 @@ export function LogScreen({
           </div>
 
           <label>
-            <span>Main drill required</span>
-            <input value={form.mainDrill} onChange={(event) => onUpdateField('mainDrill', event.target.value)} placeholder="Main drill" />
+            <FieldLabel label="Main drill required" help={fieldHelp.mainDrill} />
+            <input aria-label="Main drill required" value={form.mainDrill} onChange={(event) => onUpdateField('mainDrill', event.target.value)} placeholder="4-quadrant pell" />
           </label>
 
           <label>
-            <span>Primary mistake category required</span>
-            <select value={form.mistakeCategory} onChange={(event) => onUpdateField('mistakeCategory', event.target.value)}>
+            <FieldLabel label="Primary mistake category required" help={fieldHelp.mistakeCategory} />
+            <select aria-label="Primary mistake category required" value={form.mistakeCategory} onChange={(event) => onUpdateField('mistakeCategory', event.target.value)}>
               {MISTAKE_TAXONOMY.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
             </select>
           </label>
@@ -81,8 +81,9 @@ export function LogScreen({
               <div className="form-grid two">
                 {structuredFields.map((field) => (
                   <label key={field.key}>
-                    <span>{field.label}</span>
+                    <FieldLabel label={field.label} help={field.help} />
                     <input
+                      aria-label={field.ariaLabel || field.label}
                       inputMode="numeric"
                       value={form[field.key]}
                       onChange={(event) => onUpdateField(field.key, event.target.value)}
@@ -96,32 +97,32 @@ export function LogScreen({
 
           <div className="form-grid two">
             <label>
-              <span>Metric type required</span>
-              <select value={form.metricType} onChange={(event) => onUpdateField('metricType', event.target.value)}>
+              <FieldLabel label="Metric being tracked required" help={fieldHelp.metricType} />
+              <select aria-label="Metric type required" value={form.metricType} onChange={(event) => onUpdateField('metricType', event.target.value)}>
                 {todayPlan.trackedMetrics.map((metric) => <option key={metric}>{metric}</option>)}
               </select>
             </label>
             <label>
-              <span>Result required</span>
-              <input inputMode="decimal" value={form.result} onChange={(event) => onUpdateField('result', event.target.value)} placeholder="82" />
+              <FieldLabel label="Result for that metric required" help={fieldHelp.result} />
+              <input aria-label="Result required" inputMode="decimal" value={form.result} onChange={(event) => onUpdateField('result', event.target.value)} placeholder="82" />
             </label>
           </div>
 
           <div className="form-grid three">
             <label>
-              <span>Success required</span>
-              <select value={form.success} onChange={(event) => onUpdateField('success', event.target.value)}>
+              <FieldLabel label="Session success required" help={fieldHelp.success} />
+              <select aria-label="Success required" value={form.success} onChange={(event) => onUpdateField('success', event.target.value)}>
                 <option>Yes</option>
                 <option>No</option>
               </select>
             </label>
             <label>
-              <span>Energy required</span>
-              <input inputMode="numeric" value={form.energy} onChange={(event) => onUpdateField('energy', event.target.value)} />
+              <FieldLabel label="Energy 0-10 required" help={fieldHelp.energy} />
+              <input aria-label="Energy required" inputMode="numeric" value={form.energy} onChange={(event) => onUpdateField('energy', event.target.value)} />
             </label>
             <label>
-              <span>Confidence required</span>
-              <input inputMode="numeric" value={form.confidence} onChange={(event) => onUpdateField('confidence', event.target.value)} />
+              <FieldLabel label="Confidence 0-10 required" help={fieldHelp.confidence} />
+              <input aria-label="Confidence required" inputMode="numeric" value={form.confidence} onChange={(event) => onUpdateField('confidence', event.target.value)} />
             </label>
           </div>
 
@@ -136,7 +137,7 @@ export function LogScreen({
                 <textarea value={form.win} onChange={(event) => onUpdateField('win', event.target.value)} />
               </label>
               <label>
-                <span>Mistake detail optional</span>
+                <FieldLabel label="Mistake detail optional" help={fieldHelp.mistakeDetail} />
                 <textarea value={form.problem} onChange={(event) => onUpdateField('problem', event.target.value)} />
               </label>
             </div>
@@ -226,36 +227,117 @@ export function LogScreen({
   )
 }
 
+function FieldLabel({ label, help }) {
+  return (
+    <span className="field-label-row">
+      <span>{label}</span>
+      {help && (
+        <details className="field-help">
+          <summary aria-label={`Help: ${label}`} role="button">?</summary>
+          <div className="field-help-popover">
+            <strong>{help.definition}</strong>
+            <p>{help.enter}</p>
+            <p><em>Example: {help.example}</em></p>
+          </div>
+        </details>
+      )}
+    </span>
+  )
+}
+
 function fieldsForFocus(focusId) {
   const common = {
     technicalPrecision: [
-      { key: 'cleanReps', label: 'Clean reps', placeholder: '70' },
-      { key: 'attempts', label: 'Accuracy attempts', placeholder: '80' },
-      { key: 'successes', label: 'Accuracy successes', placeholder: '72' },
+      { key: 'cleanReps', label: 'Clean reps', placeholder: '70', help: fieldHelp.cleanReps },
+      { key: 'attempts', label: 'Attempts (tries)', ariaLabel: 'Accuracy attempts', placeholder: '80', help: fieldHelp.attempts },
+      { key: 'successes', label: 'Successful reps', ariaLabel: 'Accuracy successes', placeholder: '72', help: fieldHelp.successes },
     ],
     pressureConditioning: [
       { key: 'conditioningRoundsSurvived', label: 'Conditioning rounds survived', placeholder: '3' },
       { key: 'sparWins', label: 'Fatigue spar wins', placeholder: '4' },
       { key: 'sparLosses', label: 'Fatigue spar losses', placeholder: '2' },
-      { key: 'mistakeCount', label: 'Mistakes under fatigue', placeholder: '5' },
+      { key: 'mistakeCount', label: 'Mistake count under fatigue', ariaLabel: 'Mistakes under fatigue', placeholder: '5', help: fieldHelp.mistakeCount },
     ],
     competitionSimulation: [
       { key: 'sparWins', label: 'Spar wins', placeholder: '5' },
       { key: 'sparLosses', label: 'Spar losses', placeholder: '2' },
       { key: 'tournamentPlacement', label: 'Tournament placement', placeholder: '1' },
-      { key: 'mistakeCount', label: 'Mistakes', placeholder: '4' },
+      { key: 'mistakeCount', label: 'Mistake count', ariaLabel: 'Mistakes', placeholder: '4', help: fieldHelp.mistakeCount },
     ],
     weaknessIsolation: [
-      { key: 'mistakeCount', label: 'Weakness mistakes', placeholder: '6' },
+      { key: 'mistakeCount', label: 'Weakness mistake count', ariaLabel: 'Weakness mistakes', placeholder: '6', help: fieldHelp.mistakeCount },
       { key: 'cleanReps', label: 'Clean correction reps', placeholder: '40' },
-      { key: 'attempts', label: 'Correction attempts', placeholder: '50' },
-      { key: 'successes', label: 'Correction successes', placeholder: '38' },
+      { key: 'attempts', label: 'Correction attempts', placeholder: '50', help: fieldHelp.attempts },
+      { key: 'successes', label: 'Successful corrections', ariaLabel: 'Correction successes', placeholder: '38', help: fieldHelp.successes },
     ],
   }
 
   return common[focusId] || [
-    { key: 'attempts', label: 'Attempts', placeholder: '20' },
-    { key: 'successes', label: 'Successes', placeholder: '15' },
-    { key: 'mistakeCount', label: 'Mistakes', placeholder: '3' },
+    { key: 'attempts', label: 'Attempts (tries)', ariaLabel: 'Attempts', placeholder: '20', help: fieldHelp.attempts },
+    { key: 'successes', label: 'Successful reps', ariaLabel: 'Successes', placeholder: '15', help: fieldHelp.successes },
+    { key: 'mistakeCount', label: 'Mistake count', ariaLabel: 'Mistakes', placeholder: '3', help: fieldHelp.mistakeCount },
   ]
+}
+
+const fieldHelp = {
+  mainDrill: {
+    definition: 'The main drill or training block you spent the session on.',
+    enter: 'Enter a short drill name, not the whole workout.',
+    example: 'Retreat/reentry range drill',
+  },
+  attempts: {
+    definition: 'How many total tries you took.',
+    enter: 'Enter the full count before judging success.',
+    example: '80 swings attempted',
+  },
+  successes: {
+    definition: 'How many attempts met the standard.',
+    enter: 'Enter the count that were clean, accurate, or correct. This is different from session success.',
+    example: '72 clean hits out of 80',
+  },
+  cleanReps: {
+    definition: 'Reps performed with good form and no obvious breakdown.',
+    enter: 'Enter the clean count only.',
+    example: '70 clean reps',
+  },
+  mistakeCategory: {
+    definition: 'The primary repeated mistake for this session.',
+    enter: 'Pick the closest category. Use detail notes only if you need more context.',
+    example: 'Poor range control',
+  },
+  mistakeDetail: {
+    definition: 'Optional notes about the mistake category.',
+    enter: 'Write a short detail if the category alone is not enough.',
+    example: 'Late retreat after missed first shot',
+  },
+  mistakeCount: {
+    definition: 'How many times the key mistake happened.',
+    enter: 'Count repeat errors during the drill, spar, or review block.',
+    example: '5 late blocks',
+  },
+  metricType: {
+    definition: 'The main measurement you want this log to report.',
+    enter: 'Choose the metric that matches the result number.',
+    example: 'Accuracy %',
+  },
+  result: {
+    definition: 'The value for the selected metric.',
+    enter: 'Enter a number or short result that matches Metric being tracked.',
+    example: '82 for Accuracy %',
+  },
+  success: {
+    definition: 'A simple yes/no judgment for the whole session.',
+    enter: 'Choose Yes if the session met its goal. This is not the same as successful reps.',
+    example: 'Yes: hit the 90% clean-hit gate',
+  },
+  energy: {
+    definition: 'How much physical/mental fuel you had.',
+    enter: 'Enter 0-10, where 10 means very fresh.',
+    example: '7',
+  },
+  confidence: {
+    definition: 'How confident you felt executing the skill.',
+    enter: 'Enter 0-10, where 10 means highly confident.',
+    example: '6',
+  },
 }

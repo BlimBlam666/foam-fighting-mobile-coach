@@ -75,6 +75,62 @@ label span {
   font-weight: 700;
 }
 
+.field-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+  position: relative;
+}
+
+.field-help {
+  position: relative;
+  flex: none;
+}
+
+.field-help summary {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #075985;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-weight: 900;
+  list-style: none;
+}
+
+.field-help summary::-webkit-details-marker {
+  display: none;
+}
+
+.field-help-popover {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.4rem);
+  z-index: 20;
+  width: min(280px, calc(100vw - 2.5rem));
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  background: #f0f9ff;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.14);
+  padding: 0.75rem;
+}
+
+.field-help-popover strong,
+.field-help-popover p {
+  display: block;
+  color: #0f172a;
+  margin: 0;
+}
+
+.field-help-popover p {
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
 .app-shell {
   min-height: 100vh;
   padding: 0.75rem 0.75rem calc(6.5rem + env(safe-area-inset-bottom));
@@ -542,6 +598,57 @@ label span {
 
 .schedule-presets {
   grid-template-columns: 1fr;
+}
+
+.schedule-map-row small {
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.preset-details {
+  margin-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 0.9rem;
+}
+
+.preset-details summary {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  color: #334155;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.preset-list {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+
+.preset-list button {
+  display: grid;
+  gap: 0.2rem;
+  min-height: 64px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+  color: #0f172a;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.preset-list button.active {
+  border-color: #0ea5e9;
+  background: #f0f9ff;
+  box-shadow: inset 4px 0 0 #0ea5e9;
+}
+
+.preset-list button span {
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
 .segmented-control button {

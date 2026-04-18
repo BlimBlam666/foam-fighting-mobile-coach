@@ -12,7 +12,7 @@ export function OnboardingModal({ onDismiss, onOpenHelp, onStartLog, show }) {
 
         <div className="onboarding-steps">
           <article><strong>1. Check Home</strong><span>See today's focus, system type, goal, and required drills.</span></article>
-          <article><strong>2. Match your park schedule</strong><span>Use Plan presets or manually remap training days.</span></article>
+          <article><strong>2. Match your park schedule</strong><span>Use Plan to assign each training focus to the weekday that fits real practice.</span></article>
           <article><strong>3. Log the metric</strong><span>Track the day's expected measure after practice.</span></article>
           <article><strong>4. Repeat the loop</strong><span>Diagnose weakness, isolate, overload, pressure test, measure.</span></article>
         </div>

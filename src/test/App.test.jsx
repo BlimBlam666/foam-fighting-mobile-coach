@@ -80,6 +80,18 @@ describe('app smoke and session logging flows', () => {
     })
   })
 
+  it('shows inline help for confusing log fields', async () => {
+    const user = userEvent.setup()
+    renderSeededApp()
+
+    await openTab(user, 'Log')
+    await user.click(screen.getByRole('button', { name: 'Help: Main drill required' }))
+
+    expect(screen.getByText('The main drill or training block you spent the session on.')).toBeInTheDocument()
+    expect(screen.getByText('Enter a short drill name, not the whole workout.')).toBeInTheDocument()
+    expect(screen.getByText(/Example: Retreat\/reentry range drill/)).toBeInTheDocument()
+  })
+
   it('creates a structured Olympic metric and mistake taxonomy log from the phone flow', async () => {
     const user = userEvent.setup()
     renderSeededApp()
@@ -247,16 +259,16 @@ describe('backup and restore UI flows', () => {
 })
 
 describe('Olympic Coach schedule customization', () => {
-  it('applies a preset and persists the weekday mapping after remount', async () => {
+  it('manually remaps weekdays and persists the schedule after remount', async () => {
     const user = userEvent.setup()
     const view = renderSeededApp()
 
     await openTab(user, 'Plan')
-    await user.click(screen.getByRole('button', { name: 'Full Park Sunday' }))
+    await user.selectOptions(screen.getByLabelText('Sunday training focus'), 'competitionSimulation')
 
     await waitFor(() => {
       const stored = readStoredAppData()
-      expect(stored.settings.scheduleTemplate).toBe('fullParkSunday')
+      expect(stored.settings.scheduleTemplate).toBe('custom')
       expect(stored.settings.customSchedule.Sunday).toBe('competitionSimulation')
     })
 
@@ -266,5 +278,20 @@ describe('Olympic Coach schedule customization', () => {
     await openTab(user, 'Plan')
     expect(screen.getAllByText(/Sunday/).length).toBeGreaterThan(0)
     expect(screen.getAllByText(/Competition Simulation/).length).toBeGreaterThan(0)
+  })
+
+  it('keeps presets available as an optional starting point', async () => {
+    const user = userEvent.setup()
+    renderSeededApp()
+
+    await openTab(user, 'Plan')
+    await user.click(screen.getByText('Apply a preset starting point'))
+    await user.click(screen.getByRole('button', { name: /Full Park Sunday/ }))
+
+    await waitFor(() => {
+      const stored = readStoredAppData()
+      expect(stored.settings.scheduleTemplate).toBe('fullParkSunday')
+      expect(stored.settings.customSchedule.Sunday).toBe('competitionSimulation')
+    })
   })
 })
