@@ -1,5 +1,4 @@
 import React from 'react'
-import { weeklyPlan } from '../trainingData.js'
 
 export function LogEditorModal({
   editError,
@@ -9,6 +8,7 @@ export function LogEditorModal({
   onDelete,
   onSave,
   onUpdateField,
+  weeklyPlan,
 }) {
   if (!editForm) return null
 
@@ -90,6 +90,24 @@ export function LogEditorModal({
             </label>
           </div>
 
+          <div className="quick-summary">
+            <strong>Structured Olympic metrics</strong>
+            <span>Optional. Metrics screen prefers these over generic result parsing.</span>
+          </div>
+
+          <div className="form-grid two">
+            {structuredMetricFields.map((field) => (
+              <label key={field.key}>
+                <span>{field.label}</span>
+                <input
+                  inputMode="numeric"
+                  value={editForm[field.key]}
+                  onChange={(event) => onUpdateField(field.key, event.target.value)}
+                />
+              </label>
+            ))}
+          </div>
+
           <label>
             <span>Biggest win</span>
             <textarea value={editForm.win} onChange={(event) => onUpdateField('win', event.target.value)} />
@@ -109,3 +127,14 @@ export function LogEditorModal({
     </div>
   )
 }
+
+const structuredMetricFields = [
+  { key: 'attempts', label: 'Attempts' },
+  { key: 'successes', label: 'Successes' },
+  { key: 'cleanReps', label: 'Clean reps' },
+  { key: 'sparWins', label: 'Spar wins' },
+  { key: 'sparLosses', label: 'Spar losses' },
+  { key: 'conditioningRoundsSurvived', label: 'Conditioning rounds survived' },
+  { key: 'mistakeCount', label: 'Mistake count' },
+  { key: 'tournamentPlacement', label: 'Tournament placement' },
+]

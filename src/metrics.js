@@ -9,6 +9,7 @@ export function calculateDerivedMetrics(logs) {
   const weaknessTarget = mostCommon(logs.map((log) => log.problem).filter(Boolean)) || 'No weakness identified yet'
   const focusStats = calculateFocusStats(logs)
   const metricTypeStats = calculateMetricTypeStats(logs)
+  const programTracking = calculateProgramTracking(logs, metricTypeStats)
 
   return {
     sessions,
@@ -21,7 +22,47 @@ export function calculateDerivedMetrics(logs) {
     weaknessTarget,
     focusStats,
     metricTypeStats,
+    programTracking,
   }
+}
+
+function calculateProgramTracking(logs, metricTypeStats) {
+  const byType = new Map(metricTypeStats.map((item) => [item.metricType, item]))
+  const specs = [
+    { key: 'cleanReps', label: 'Clean reps', metricType: 'Clean reps', suffix: '', empty: 'No clean reps logged', values: logs.map((log) => log.cleanReps) },
+    { key: 'sparWins', label: 'Spar wins', metricType: 'Spar wins %', suffix: '%', empty: 'No spar win % logged', values: logs.map(sparWinRate) },
+    { key: 'accuracy', label: 'Accuracy', metricType: 'Accuracy %', suffix: '%', empty: 'No accuracy logged', values: logs.map(accuracyRate) },
+    { key: 'conditioningRounds', label: 'Conditioning rounds', metricType: 'Conditioning rounds survived', suffix: '', empty: 'No conditioning rounds logged', values: logs.map((log) => log.conditioningRoundsSurvived) },
+    { key: 'mistakeFrequency', label: 'Mistake frequency', metricType: 'Mistake frequency', suffix: '', empty: 'No mistakes logged', values: logs.map((log) => log.mistakeCount) },
+    { key: 'tournamentPlacement', label: 'Tournament placement', metricType: 'Tournament placement', suffix: '', empty: 'No placement logged', values: logs.map((log) => log.tournamentPlacement) },
+  ]
+
+  return specs.map((spec) => {
+    const structuredValues = spec.values.filter((value) => typeof value === 'number' && Number.isFinite(value))
+    const stat = byType.get(spec.metricType)
+    const hasStructured = structuredValues.length > 0
+    return {
+      ...spec,
+      count: hasStructured ? structuredValues.length : stat?.count || 0,
+      averageResult: hasStructured ? average(structuredValues) : stat?.averageResult ?? null,
+      source: hasStructured ? 'structured' : stat?.count ? 'legacy' : 'none',
+    }
+  })
+}
+
+function accuracyRate(log) {
+  if (typeof log.attempts === 'number' && log.attempts > 0 && typeof log.successes === 'number') {
+    return Math.round((log.successes / log.attempts) * 100)
+  }
+  return null
+}
+
+function sparWinRate(log) {
+  if (typeof log.sparWins !== 'number') return null
+  const losses = typeof log.sparLosses === 'number' ? log.sparLosses : 0
+  const total = log.sparWins + losses
+  if (total <= 0) return null
+  return Math.round((log.sparWins / total) * 100)
 }
 
 function calculateFocusStats(logs) {

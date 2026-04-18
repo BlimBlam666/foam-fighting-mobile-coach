@@ -1,5 +1,7 @@
-export const APP_SCHEMA_VERSION = 1
-export const SESSION_LOG_SCHEMA_VERSION = 1
+import { createScheduleFromTemplate, defaultScheduleTemplateId, normalizeSchedule, scheduleTemplates } from './trainingData.js'
+
+export const APP_SCHEMA_VERSION = 3
+export const SESSION_LOG_SCHEMA_VERSION = 2
 export const STORAGE_KEY = 'foam-fighter-app-data-v1'
 export const LEGACY_LOGS_STORAGE_KEY = 'foam-fighter-session-logs'
 
@@ -24,6 +26,8 @@ export function createDefaultSettings() {
     selectedWeek: 'Week 2',
     demoMode: false,
     onboardingCompleted: false,
+    scheduleTemplate: defaultScheduleTemplateId,
+    customSchedule: createScheduleFromTemplate(defaultScheduleTemplateId),
   }
 }
 
@@ -62,6 +66,14 @@ export function createSessionLog(input, options = {}) {
     confidence: Number(input.confidence),
     win: input.win,
     problem: input.problem,
+    attempts: optionalNumber(input.attempts),
+    successes: optionalNumber(input.successes),
+    cleanReps: optionalNumber(input.cleanReps),
+    sparWins: optionalNumber(input.sparWins),
+    sparLosses: optionalNumber(input.sparLosses),
+    conditioningRoundsSurvived: optionalNumber(input.conditioningRoundsSurvived),
+    mistakeCount: optionalNumber(input.mistakeCount),
+    tournamentPlacement: optionalNumber(input.tournamentPlacement),
   }
 
   const result = validateSessionLog(log)
@@ -96,6 +108,14 @@ export function updateSessionLog(existingLog, input, options = {}) {
     confidence: Number(input.confidence),
     win: input.win,
     problem: input.problem,
+    attempts: optionalNumber(input.attempts),
+    successes: optionalNumber(input.successes),
+    cleanReps: optionalNumber(input.cleanReps),
+    sparWins: optionalNumber(input.sparWins),
+    sparLosses: optionalNumber(input.sparLosses),
+    conditioningRoundsSurvived: optionalNumber(input.conditioningRoundsSurvived),
+    mistakeCount: optionalNumber(input.mistakeCount),
+    tournamentPlacement: optionalNumber(input.tournamentPlacement),
   }
 
   const result = validateSessionLog(log)
@@ -128,6 +148,18 @@ export function validateSessionLog(log) {
   requireFiniteNumber(log, 'confidence', errors, { min: 0, max: 10 })
   requireString(log, 'win', errors)
   requireString(log, 'problem', errors)
+  validateOptionalNumber(log, 'attempts', errors, { min: 0 })
+  validateOptionalNumber(log, 'successes', errors, { min: 0 })
+  validateOptionalNumber(log, 'cleanReps', errors, { min: 0 })
+  validateOptionalNumber(log, 'sparWins', errors, { min: 0 })
+  validateOptionalNumber(log, 'sparLosses', errors, { min: 0 })
+  validateOptionalNumber(log, 'conditioningRoundsSurvived', errors, { min: 0 })
+  validateOptionalNumber(log, 'mistakeCount', errors, { min: 0 })
+  validateOptionalNumber(log, 'tournamentPlacement', errors, { min: 1 })
+
+  if (typeof log.attempts === 'number' && typeof log.successes === 'number' && log.successes > log.attempts) {
+    errors.push('successes must be <= attempts')
+  }
 
   return errors.length ? { ok: false, errors } : { ok: true, value: log }
 }
@@ -151,6 +183,19 @@ export function validateAppData(data) {
     }
     if (data.settings.onboardingCompleted === undefined) {
       data.settings.onboardingCompleted = false
+    }
+    if (data.settings.scheduleTemplate !== 'custom' && !scheduleTemplates[data.settings.scheduleTemplate]) {
+      errors.push('settings.scheduleTemplate must be a known schedule template or "custom"')
+    }
+    if (!isPlainObject(data.settings.customSchedule)) {
+      errors.push('settings.customSchedule must be an object')
+    } else {
+      const normalized = normalizeSchedule(data.settings.customSchedule)
+      Object.entries(normalized).forEach(([day, focusId]) => {
+        if (data.settings.customSchedule[day] !== focusId) {
+          errors.push(`settings.customSchedule.${day} must be a known training focus`)
+        }
+      })
     }
   }
 
@@ -211,6 +256,14 @@ export function parseImportedAppData(value) {
     return migrateLegacyLogArray(value.logs)
   }
 
+  if (value.schemaVersion === 1 || value.schemaVersion === 2) {
+    const migrated = migrateAppDataToCurrent(value)
+    const result = validateAppData(migrated)
+    return result.ok
+      ? { ok: true, value: migrated, migrated: true, errors: [] }
+      : { ok: false, value: null, migrated: false, errors: result.errors }
+  }
+
   if (value.schemaVersion !== APP_SCHEMA_VERSION) {
     return {
       ok: false,
@@ -251,6 +304,46 @@ export function migrateLegacyLogArray(logs) {
   appData.metadata.migratedFrom = 'legacy-session-log-array'
 
   return { ok: true, value: appData, migrated: true, errors: [] }
+}
+
+export function migrateAppDataToCurrent(data) {
+  const defaults = createEmptyAppData()
+  const sourceVersion = Number.isFinite(data.schemaVersion) ? data.schemaVersion : 'unknown'
+  return {
+    ...defaults,
+    ...data,
+    schemaVersion: APP_SCHEMA_VERSION,
+    logs: Array.isArray(data.logs) ? data.logs.map(migrateSessionLogToCurrent) : [],
+    settings: {
+      ...defaults.settings,
+      ...(isPlainObject(data.settings) ? data.settings : {}),
+      scheduleTemplate: isPlainObject(data.settings) && (scheduleTemplates[data.settings.scheduleTemplate] || data.settings.scheduleTemplate === 'custom')
+        ? data.settings.scheduleTemplate
+        : defaultScheduleTemplateId,
+      customSchedule: normalizeSchedule(isPlainObject(data.settings) ? data.settings.customSchedule : null),
+    },
+    metadata: {
+      ...defaults.metadata,
+      ...(isPlainObject(data.metadata) ? data.metadata : {}),
+      updatedAt: nowIso(),
+      migratedFrom: appendMigration(data.metadata?.migratedFrom, `app-data-v${sourceVersion}`),
+    },
+  }
+}
+
+export function migrateSessionLogToCurrent(log) {
+  return {
+    ...log,
+    schemaVersion: SESSION_LOG_SCHEMA_VERSION,
+    attempts: optionalNumber(log.attempts),
+    successes: optionalNumber(log.successes),
+    cleanReps: optionalNumber(log.cleanReps),
+    sparWins: optionalNumber(log.sparWins),
+    sparLosses: optionalNumber(log.sparLosses),
+    conditioningRoundsSurvived: optionalNumber(log.conditioningRoundsSurvived),
+    mistakeCount: optionalNumber(log.mistakeCount),
+    tournamentPlacement: optionalNumber(log.tournamentPlacement),
+  }
 }
 
 export function mergeImportedAppData(currentAppData, importedAppData) {
@@ -373,6 +466,11 @@ function dateToIso(value) {
   return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString()
 }
 
+function appendMigration(existing, next) {
+  if (typeof existing === 'string' && existing.trim()) return `${existing}, ${next}`
+  return next
+}
+
 function isPlainObject(value) {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
 }
@@ -397,6 +495,20 @@ function requireFiniteNumber(object, key, errors, options = {}) {
 
   if (options.min !== undefined && object[key] < options.min) errors.push(`${key} must be >= ${options.min}`)
   if (options.max !== undefined && object[key] > options.max) errors.push(`${key} must be <= ${options.max}`)
+}
+
+function optionalNumber(value) {
+  if (value === undefined || value === null || value === '') return null
+  const number = Number(value)
+  return Number.isFinite(number) ? number : value
+}
+
+function validateOptionalNumber(object, key, errors, options = {}) {
+  if (object[key] === undefined) {
+    object[key] = null
+  }
+  if (object[key] === null) return
+  requireFiniteNumber(object, key, errors, options)
 }
 
 function requireIsoString(object, key, errors) {

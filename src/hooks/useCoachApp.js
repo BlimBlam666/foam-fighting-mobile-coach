@@ -10,12 +10,13 @@ import {
 } from '../dataModel.js'
 import { calculateDerivedMetrics } from '../metrics.js'
 import { createExportPayload, loadAppData, saveAppData } from '../storage.js'
-import { demoLogs, weeklyPlan } from '../trainingData.js'
+import { createScheduleFromTemplate, demoLogs, getPlanForDay, getWeeklyPlan } from '../trainingData.js'
 import { formFromLog, initialLogForm, readFileAsText, todayIndex } from '../app/appHelpers.js'
 
 export function useCoachApp() {
   const loaded = useMemo(() => loadAppData(), [])
-  const currentPlan = weeklyPlan[todayIndex()]
+  const initialWeeklyPlan = getWeeklyPlan(loaded.appData.settings.customSchedule)
+  const currentPlan = initialWeeklyPlan[todayIndex()]
   const [tab, setTab] = useState('today')
   const [appData, setAppData] = useState(loaded.appData)
   const [storageStatus, setStorageStatus] = useState(loaded.status)
@@ -34,6 +35,7 @@ export function useCoachApp() {
 
   const logs = appData.logs
   const selectedWeek = appData.settings.selectedWeek
+  const weeklyPlan = useMemo(() => getWeeklyPlan(appData.settings.customSchedule), [appData.settings.customSchedule])
   const metrics = useMemo(() => calculateDerivedMetrics(logs), [logs])
 
   useEffect(() => {
@@ -43,8 +45,8 @@ export function useCoachApp() {
   }, [appData])
 
   const todayPlan = useMemo(() => {
-    return weeklyPlan.find((plan) => plan.day === form.day) || currentPlan
-  }, [form.day, currentPlan])
+    return getPlanForDay(form.day, appData.settings.customSchedule) || weeklyPlan[todayIndex()]
+  }, [appData.settings.customSchedule, form.day, weeklyPlan])
 
   function updateAppData(updater) {
     setAppData((prev) => {
@@ -67,6 +69,39 @@ export function useCoachApp() {
         ...partialSettings,
       },
     }))
+  }
+
+  function applyScheduleTemplate(templateId) {
+    const nextSchedule = createScheduleFromTemplate(templateId)
+    updateSettings({
+      scheduleTemplate: templateId,
+      customSchedule: nextSchedule,
+    })
+    const picked = getPlanForDay(form.day, nextSchedule)
+    setForm((prev) => ({
+      ...prev,
+      focus: picked.focus,
+      metricType: picked.metric,
+    }))
+  }
+
+  function updateScheduleDay(day, focusId) {
+    const nextSchedule = {
+      ...appData.settings.customSchedule,
+      [day]: focusId,
+    }
+    updateSettings({
+      scheduleTemplate: 'custom',
+      customSchedule: nextSchedule,
+    })
+    if (form.day === day) {
+      const picked = getPlanForDay(day, nextSchedule)
+      setForm((prev) => ({
+        ...prev,
+        focus: picked.focus,
+        metricType: picked.metric,
+      }))
+    }
   }
 
   function finishOnboarding() {
@@ -95,7 +130,7 @@ export function useCoachApp() {
   }
 
   function changeDay(value) {
-    const picked = weeklyPlan.find((plan) => plan.day === value)
+    const picked = getPlanForDay(value, appData.settings.customSchedule)
     setForm((prev) => ({
       ...prev,
       day: value,
@@ -105,7 +140,7 @@ export function useCoachApp() {
   }
 
   function changeEditDay(value) {
-    const picked = weeklyPlan.find((plan) => plan.day === value)
+    const picked = getPlanForDay(value, appData.settings.customSchedule)
     setEditForm((prev) => ({
       ...prev,
       day: value,
@@ -189,6 +224,14 @@ export function useCoachApp() {
         confidence: form.confidence,
         win: form.win || 'Logged session',
         problem: form.problem || 'No issue noted',
+        attempts: form.attempts,
+        successes: form.successes,
+        cleanReps: form.cleanReps,
+        sparWins: form.sparWins,
+        sparLosses: form.sparLosses,
+        conditioningRoundsSurvived: form.conditioningRoundsSurvived,
+        mistakeCount: form.mistakeCount,
+        tournamentPlacement: form.tournamentPlacement,
       })
 
       updateAppData((prev) => ({
@@ -210,6 +253,14 @@ export function useCoachApp() {
         confidence: '7',
         win: '',
         problem: '',
+        attempts: '',
+        successes: '',
+        cleanReps: '',
+        sparWins: '',
+        sparLosses: '',
+        conditioningRoundsSurvived: '',
+        mistakeCount: '',
+        tournamentPlacement: '',
       }))
       setStorageErrors([])
       setSaveMessage('Session saved. Your metrics are updated.')
@@ -373,6 +424,7 @@ export function useCoachApp() {
 
   return {
     appData,
+    applyScheduleTemplate,
     clearLogs,
     closeLogEditor,
     copyFallbackJson,
@@ -397,6 +449,7 @@ export function useCoachApp() {
     saveEditedLog,
     saveMessage,
     selectedWeek,
+    scheduleTemplate: appData.settings.scheduleTemplate,
     setExportFallbackJson,
     setImportMode,
     setShowAdvancedLog,
@@ -413,6 +466,8 @@ export function useCoachApp() {
     updateEditForm,
     updateForm,
     updateSettings,
+    updateScheduleDay,
+    weeklyPlan,
     changeDay,
     changeEditDay,
   }

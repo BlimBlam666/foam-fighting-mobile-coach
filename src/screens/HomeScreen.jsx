@@ -20,8 +20,12 @@ export function HomeScreen({ logs, metrics, onLogClick, saveMessage, todayPlan }
 
       <section className="panel">
         <div className="panel-head">
-          <h3>5-phase session</h3>
-          <span className="subtle">Keep it deliberate and measurable.</span>
+          <h3>Olympic Coach session</h3>
+          <span className="subtle">90 min ideal / 45 min minimum.</span>
+        </div>
+        <div className="callout success">
+          <strong>{todayPlan.title}</strong>
+          <p>{todayPlan.focus} / {todayPlan.system}</p>
         </div>
         <div className="phase-list">
           {todayPlan.phases.map((phase, index) => (
@@ -38,15 +42,19 @@ export function HomeScreen({ logs, metrics, onLogClick, saveMessage, todayPlan }
           <h3>Coach prompts</h3>
         </div>
         <div className="callout success">
-          <strong>Success standard</strong>
-          <p>Track {todayPlan.metric} and do not add speed or complexity until quality stays clean.</p>
+          <strong>Day goal</strong>
+          <p>{todayPlan.goal}</p>
+        </div>
+        <div className="callout success">
+          <strong>Tracked metrics</strong>
+          <p>{todayPlan.trackedMetrics.join(', ')}</p>
         </div>
         <div className="callout warning">
           <strong>Current weakness target</strong>
           <p>{logs.length === 0 ? 'Log a few sessions first. Repeated problems will show up here.' : metrics.weaknessTarget}</p>
         </div>
-        <div className="chip-wrap">
-          {todayPlan.drillIdeas.map((item) => (
+          <div className="chip-wrap">
+          {todayPlan.requiredDrills.map((item) => (
             <span className="chip" key={item}>{item}</span>
           ))}
         </div>

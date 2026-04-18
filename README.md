@@ -1,14 +1,16 @@
 # Foam Fighter Mobile Coach
 
-A mobile-first beta app for foam fighting practice logs, weekly metrics, weakness targeting, periodization, and local JSON backup/restore.
+A mobile-first beta app for the Olympic Coach foam fighting program: Warlord acceleration, practice logs, weekly metrics, schedule customization, periodization, and local JSON backup/restore.
 
 The app is intentionally local-first: training data is stored in the current device/browser using `localStorage`. There is no account, server database, or cloud sync.
 
 ## Current Beta Features
 
 - Quick session logging optimized for phones.
+- Olympic Coach default program with 6 training days plus 1 recovery day.
+- Schedule presets and manual weekday remapping for real park practice.
 - Per-log edit and delete with confirmation.
-- Weekly metrics derived from saved logs.
+- Weekly metrics for clean reps, spar wins, accuracy, conditioning rounds, mistakes, and placement.
 - Weakness targeting based on repeated logged problems.
 - Weekly plan and periodization reference.
 - First-run onboarding and persistent help screen.

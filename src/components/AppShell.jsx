@@ -43,7 +43,7 @@ export function TodayHero({ metrics, onLogNow, todayPlan }) {
         <div>
           <div className="tiny-label">Today</div>
           <h2>{todayPlan.day}</h2>
-          <p>{todayPlan.focus} training</p>
+          <p>{todayPlan.focus} / {todayPlan.system}</p>
         </div>
         <button className="metric-pill hero-action" onClick={onLogNow} type="button">Log now</button>
       </div>

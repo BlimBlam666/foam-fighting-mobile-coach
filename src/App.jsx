@@ -61,6 +61,8 @@ export default function App() {
             showAdvancedLog={coach.showAdvancedLog}
             storageErrors={coach.storageErrors}
             storageStatus={coach.storageStatus}
+            todayPlan={coach.todayPlan}
+            weeklyPlan={coach.weeklyPlan}
           />
         )}
 
@@ -97,8 +99,12 @@ export default function App() {
 
         {coach.tab === 'week' && (
           <PlanScreen
+            onApplyScheduleTemplate={coach.applyScheduleTemplate}
+            onUpdateScheduleDay={coach.updateScheduleDay}
             onUpdateSettings={coach.updateSettings}
+            scheduleTemplate={coach.scheduleTemplate}
             selectedWeek={coach.selectedWeek}
+            weeklyPlan={coach.weeklyPlan}
           />
         )}
 
@@ -115,6 +121,7 @@ export default function App() {
           onDelete={coach.deleteEditedLog}
           onSave={coach.saveEditedLog}
           onUpdateField={coach.updateEditForm}
+          weeklyPlan={coach.weeklyPlan}
         />
 
         <OnboardingModal

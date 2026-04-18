@@ -19,6 +19,14 @@ export function initialLogForm(plan) {
     confidence: '7',
     win: '',
     problem: '',
+    attempts: '',
+    successes: '',
+    cleanReps: '',
+    sparWins: '',
+    sparLosses: '',
+    conditioningRoundsSurvived: '',
+    mistakeCount: '',
+    tournamentPlacement: '',
   }
 }
 
@@ -36,7 +44,19 @@ export function formFromLog(log) {
     confidence: String(log.confidence),
     win: log.win,
     problem: log.problem,
+    attempts: valueToFormString(log.attempts),
+    successes: valueToFormString(log.successes),
+    cleanReps: valueToFormString(log.cleanReps),
+    sparWins: valueToFormString(log.sparWins),
+    sparLosses: valueToFormString(log.sparLosses),
+    conditioningRoundsSurvived: valueToFormString(log.conditioningRoundsSurvived),
+    mistakeCount: valueToFormString(log.mistakeCount),
+    tournamentPlacement: valueToFormString(log.tournamentPlacement),
   }
+}
+
+export function valueToFormString(value) {
+  return value === null || value === undefined ? '' : String(value)
 }
 
 export function successClass(value) {

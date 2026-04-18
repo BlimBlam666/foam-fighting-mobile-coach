@@ -1,6 +1,5 @@
 import React from 'react'
 import { storageStatusText } from '../app/appHelpers.js'
-import { weeklyPlan } from '../trainingData.js'
 
 export function LogScreen({
   form,
@@ -17,7 +16,11 @@ export function LogScreen({
   showAdvancedLog,
   storageErrors,
   storageStatus,
+  todayPlan,
+  weeklyPlan,
 }) {
+  const structuredFields = fieldsForFocus(todayPlan.focusId)
+
   return (
     <div className="stack">
       <section className="panel">
@@ -29,7 +32,7 @@ export function LogScreen({
         <form onSubmit={onSubmitLog}>
           <div className="quick-summary">
             <strong>{form.day} / {form.focus}</strong>
-            <span>{form.metricType}</span>
+            <span>{todayPlan.system} / Track: {todayPlan.trackedMetrics.join(', ')}</span>
           </div>
 
           <div className="form-grid two">
@@ -61,10 +64,34 @@ export function LogScreen({
             <input value={form.mainDrill} onChange={(event) => onUpdateField('mainDrill', event.target.value)} placeholder="Main drill" />
           </label>
 
+          {structuredFields.length > 0 && (
+            <div className="structured-log">
+              <div className="quick-summary">
+                <strong>Olympic metrics</strong>
+                <span>Fill what you measured today. Generic result remains available below.</span>
+              </div>
+              <div className="form-grid two">
+                {structuredFields.map((field) => (
+                  <label key={field.key}>
+                    <span>{field.label}</span>
+                    <input
+                      inputMode="numeric"
+                      value={form[field.key]}
+                      onChange={(event) => onUpdateField(field.key, event.target.value)}
+                      placeholder={field.placeholder}
+                    />
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="form-grid two">
             <label>
               <span>Metric type required</span>
-              <input value={form.metricType} onChange={(event) => onUpdateField('metricType', event.target.value)} />
+              <select value={form.metricType} onChange={(event) => onUpdateField('metricType', event.target.value)}>
+                {todayPlan.trackedMetrics.map((metric) => <option key={metric}>{metric}</option>)}
+              </select>
             </label>
             <label>
               <span>Result required</span>
@@ -109,6 +136,32 @@ export function LogScreen({
 
           <button className="primary-btn" type="submit">Save session</button>
         </form>
+      </section>
+
+      <section className="panel">
+        <div className="panel-head">
+          <h3>Expected structure</h3>
+          <span className="subtle">90 min ideal / 45 min minimum.</span>
+        </div>
+        <div className="phase-list">
+          {todayPlan.phases.map((phase, index) => (
+            <div className="phase-item" key={phase}>
+              <div className="phase-index">{index + 1}</div>
+              <div>{phase}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="panel">
+        <div className="panel-head">
+          <h3>Required drills</h3>
+        </div>
+        <div className="chip-wrap">
+          {todayPlan.requiredDrills.map((item) => (
+            <span className="chip" key={item}>{item}</span>
+          ))}
+        </div>
       </section>
 
       <section className="panel">
@@ -163,4 +216,38 @@ export function LogScreen({
       </section>
     </div>
   )
+}
+
+function fieldsForFocus(focusId) {
+  const common = {
+    technicalPrecision: [
+      { key: 'cleanReps', label: 'Clean reps', placeholder: '70' },
+      { key: 'attempts', label: 'Accuracy attempts', placeholder: '80' },
+      { key: 'successes', label: 'Accuracy successes', placeholder: '72' },
+    ],
+    pressureConditioning: [
+      { key: 'conditioningRoundsSurvived', label: 'Conditioning rounds survived', placeholder: '3' },
+      { key: 'sparWins', label: 'Fatigue spar wins', placeholder: '4' },
+      { key: 'sparLosses', label: 'Fatigue spar losses', placeholder: '2' },
+      { key: 'mistakeCount', label: 'Mistakes under fatigue', placeholder: '5' },
+    ],
+    competitionSimulation: [
+      { key: 'sparWins', label: 'Spar wins', placeholder: '5' },
+      { key: 'sparLosses', label: 'Spar losses', placeholder: '2' },
+      { key: 'tournamentPlacement', label: 'Tournament placement', placeholder: '1' },
+      { key: 'mistakeCount', label: 'Mistakes', placeholder: '4' },
+    ],
+    weaknessIsolation: [
+      { key: 'mistakeCount', label: 'Weakness mistakes', placeholder: '6' },
+      { key: 'cleanReps', label: 'Clean correction reps', placeholder: '40' },
+      { key: 'attempts', label: 'Correction attempts', placeholder: '50' },
+      { key: 'successes', label: 'Correction successes', placeholder: '38' },
+    ],
+  }
+
+  return common[focusId] || [
+    { key: 'attempts', label: 'Attempts', placeholder: '20' },
+    { key: 'successes', label: 'Successes', placeholder: '15' },
+    { key: 'mistakeCount', label: 'Mistakes', placeholder: '3' },
+  ]
 }

@@ -38,6 +38,47 @@ describe('session log validation and parsing', () => {
     expect(parseImportedAppDataJson('{oops').errors).toContain('import file is not valid JSON')
     expect(parseImportedAppDataJson(JSON.stringify({ schemaVersion: 999 })).errors).toContain('unsupported AppData schemaVersion: 999')
   })
+
+  it('migrates AppData v1 settings into the Olympic schedule contract', () => {
+    const appData = makeAppData([makeLog()])
+    const parsed = parseImportedAppDataJson(JSON.stringify({
+      ...appData,
+      schemaVersion: 1,
+      settings: {
+        selectedWeek: 'Week 2',
+        demoMode: false,
+        onboardingCompleted: true,
+      },
+    }))
+
+    expect(parsed.ok).toBe(true)
+    expect(parsed.migrated).toBe(true)
+    expect(parsed.value.schemaVersion).toBe(APP_SCHEMA_VERSION)
+    expect(parsed.value.logs[0].schemaVersion).toBe(SESSION_LOG_SCHEMA_VERSION)
+    expect(parsed.value.logs[0].cleanReps).toBe(null)
+    expect(parsed.value.settings.scheduleTemplate).toBe('standardOlympic')
+    expect(parsed.value.settings.customSchedule.Wednesday).toBe('tacticalIq')
+  })
+
+  it('creates structured Olympic metric fields on new logs', () => {
+    const log = createSessionLog({
+      ...baseLogInput,
+      attempts: '80',
+      successes: '72',
+      cleanReps: '70',
+      sparWins: '',
+      mistakeCount: '4',
+    })
+
+    expect(log).toMatchObject({
+      schemaVersion: SESSION_LOG_SCHEMA_VERSION,
+      attempts: 80,
+      successes: 72,
+      cleanReps: 70,
+      sparWins: null,
+      mistakeCount: 4,
+    })
+  })
 })
 
 describe('migration behavior', () => {

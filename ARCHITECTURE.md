@@ -28,6 +28,7 @@ src/
     PlanScreen.jsx
   dataModel.js
   metrics.js
+  coachReview.js
   storage.js
   trainingData.js
   test/
@@ -51,9 +52,11 @@ The main app controller. It owns React state and user actions:
 - loading and saving `AppData`
 - creating session logs
 - editing/deleting session logs
+- structured Olympic metric fields on logs
 - onboarding state
 - active tab state
 - import/export UI state
+- schedule preset and custom weekday mapping
 - demo data loading
 - derived metrics
 
@@ -92,11 +95,14 @@ Screen-level rendering only. These components receive state and callbacks from `
 - `BackupScreen.jsx`: export fallback, import merge/replace, destructive actions
 - `HelpScreen.jsx`: persistent help and onboarding replay
 - `PlanScreen.jsx`: weekly plan and periodization
+- `PlanScreen.jsx`: Olympic Coach schedule presets, manual weekday mapping, and periodization
 - `LibraryScreen.jsx`: drill library view retained for the existing hidden tab path
 
 `src/dataModel.js`
 
 Canonical client-side data contract and validation/migration logic. This file defines `AppData`, `SessionLog`, schema versions, strict parsing, legacy migration, and merge behavior.
+
+`AppData` schema version 3 adds structured optional Olympic metrics to `SessionLog` schema version 2 while preserving the generic `metricType/result` fallback path.
 
 `src/storage.js`
 
@@ -104,11 +110,15 @@ The localStorage boundary. Components and screens should not read or write raw `
 
 `src/metrics.js`
 
-Pure derived metrics from session logs.
+Pure derived metrics from session logs. Program tracking prefers structured Olympic fields and falls back to numeric `metricType/result` values for older logs.
+
+`src/coachReview.js`
+
+Pure rule-based weekly review logic. It turns logs into trend summaries, weakness prioritization, coach verdicts, next-week focus, and Sunday review prompts. It does not use AI or hidden scoring.
 
 `src/trainingData.js`
 
-Static weekly plan, periodization, drill library, and optional demo data.
+Olympic Coach program content: training focus definitions, schedule presets, weekday schedule helpers, periodization, drill library, and optional demo data.
 
 `src/test/`
 
@@ -119,12 +129,14 @@ Vitest and React Testing Library coverage for beta-critical data, metrics, stora
 1. `App.jsx` mounts and calls `useCoachApp()`.
 2. `useCoachApp()` calls `loadAppData()` from `storage.js`.
 3. `storage.js` reads localStorage and delegates parsing/migration to `dataModel.js`.
-4. The hook stores canonical `AppData` in React state.
-5. Screens render from hook state passed through `App.jsx`.
-6. User actions call hook methods such as `submitLog()`, `saveEditedLog()`, `deleteEditedLog()`, or `importFromFile()`.
-7. Hook methods create or update canonical data through `dataModel.js`.
-8. A `useEffect()` in `useCoachApp()` persists changed `AppData` through `saveAppData()`.
-9. `metrics.js` derives dashboard values from the current log array.
+4. The hook stores canonical `AppData` in React state, including schedule settings.
+5. `useCoachApp()` derives the active weekly plan from `settings.customSchedule`.
+6. Screens render from hook state passed through `App.jsx`.
+7. User actions call hook methods such as `submitLog()`, `saveEditedLog()`, `deleteEditedLog()`, `applyScheduleTemplate()`, `updateScheduleDay()`, or `importFromFile()`.
+8. Hook methods create or update canonical data through `dataModel.js`.
+9. A `useEffect()` in `useCoachApp()` persists changed `AppData` through `saveAppData()`.
+10. `metrics.js` derives dashboard values from the current log array.
+11. `coachReview.js` derives transparent weekly coaching guidance for the Stats screen.
 
 ## Extension Guidelines
 

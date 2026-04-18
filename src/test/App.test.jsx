@@ -14,10 +14,17 @@ async function openTab(user, name) {
   await user.click(screen.getByRole('button', { name }))
 }
 
-async function createLogThroughUi(user, { mainDrill = 'Shield side entries', result = '84' } = {}) {
+async function createLogThroughUi(user, { day, mainDrill = 'Shield side entries', result = '84', cleanReps } = {}) {
   await openTab(user, 'Log')
+  if (day) {
+    await user.selectOptions(screen.getByLabelText('Training day required'), day)
+  }
   await user.clear(screen.getByLabelText('Main drill required'))
   await user.type(screen.getByLabelText('Main drill required'), mainDrill)
+  if (cleanReps !== undefined) {
+    await user.clear(screen.getByLabelText('Clean reps'))
+    await user.type(screen.getByLabelText('Clean reps'), String(cleanReps))
+  }
   await user.clear(screen.getByLabelText('Result required'))
   await user.type(screen.getByLabelText('Result required'), result)
   await user.click(screen.getByRole('button', { name: 'Save session' }))
@@ -51,7 +58,21 @@ describe('app smoke and session logging flows', () => {
     expect(readStoredAppData().logs[0]).toMatchObject({
       mainDrill: 'Shield side entries',
       result: '84',
-      schemaVersion: 1,
+      schemaVersion: 2,
+    })
+  })
+
+  it('creates a structured Olympic metric log from the phone flow', async () => {
+    const user = userEvent.setup()
+    renderSeededApp()
+
+    await createLogThroughUi(user, { day: 'Monday', mainDrill: '4-quadrant pell', result: '90', cleanReps: 72 })
+
+    await waitFor(() => expect(readStoredAppData().logs).toHaveLength(1))
+    expect(readStoredAppData().logs[0]).toMatchObject({
+      day: 'Monday',
+      cleanReps: 72,
+      metricType: 'Accuracy %',
     })
   })
 
@@ -82,6 +103,8 @@ describe('app smoke and session logging flows', () => {
     await user.type(within(dialog).getByLabelText('Minutes'), '90')
     await user.clear(within(dialog).getByLabelText('Result'))
     await user.type(within(dialog).getByLabelText('Result'), '91')
+    await user.clear(within(dialog).getByLabelText('Clean reps'))
+    await user.type(within(dialog).getByLabelText('Clean reps'), '66')
     await user.click(within(dialog).getByRole('button', { name: 'Save changes' }))
 
     await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Edit session log' })).not.toBeInTheDocument())
@@ -95,6 +118,7 @@ describe('app smoke and session logging flows', () => {
       expect(stored.updatedAt).not.toBe('2026-04-17T10:00:00.000Z')
       expect(stored.duration).toBe(90)
       expect(stored.result).toBe('91')
+      expect(stored.cleanReps).toBe(66)
     })
   })
 
@@ -192,11 +216,34 @@ describe('backup and restore UI flows', () => {
     const textarea = screen.getByLabelText('Copyable backup JSON')
     expect(textarea).toBeInTheDocument()
     const backup = JSON.parse(textarea.value)
-    expect(backup.schemaVersion).toBe(1)
+    expect(backup.schemaVersion).toBe(3)
     expect(backup.logs).toHaveLength(1)
     expect(backup.logs[0].id).toBe('log_export')
     expect(backup.metadata.exportedAt).toEqual(expect.any(String))
     expect(Date.parse(backup.metadata.exportedAt)).not.toBeNaN()
     expect(readStoredAppData().logs[0].id).toBe('log_export')
+  })
+})
+
+describe('Olympic Coach schedule customization', () => {
+  it('applies a preset and persists the weekday mapping after remount', async () => {
+    const user = userEvent.setup()
+    const view = renderSeededApp()
+
+    await openTab(user, 'Plan')
+    await user.click(screen.getByRole('button', { name: 'Full Park Sunday' }))
+
+    await waitFor(() => {
+      const stored = readStoredAppData()
+      expect(stored.settings.scheduleTemplate).toBe('fullParkSunday')
+      expect(stored.settings.customSchedule.Sunday).toBe('competitionSimulation')
+    })
+
+    view.unmount()
+    render(<App />)
+
+    await openTab(user, 'Plan')
+    expect(screen.getAllByText(/Sunday/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/Competition Simulation/).length).toBeGreaterThan(0)
   })
 })

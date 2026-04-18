@@ -7,26 +7,26 @@ export function HelpScreen({ onShowOnboarding }) {
         <div className="panel-head wrap-head">
           <div>
             <h3>How to use this app</h3>
-            <span className="subtle">A quick map for practice nights.</span>
+            <span className="subtle">Olympic Coach program map for park schedules.</span>
           </div>
         </div>
         <div className="help-list">
-          <article><strong>Home</strong><p>Shows today's focus, the session plan, and your current weakness target.</p></article>
-          <article><strong>Log</strong><p>Save a session in under a minute. Tap an old log to edit or delete it.</p></article>
-          <article><strong>Stats</strong><p>Turns your logs into success rate, energy, confidence, focus trends, and repeated problems.</p></article>
+          <article><strong>Home</strong><p>Shows today's scheduled Olympic Coach focus, system type, day goal, and weakness target.</p></article>
+          <article><strong>Log</strong><p>Save a session with the day's expected metrics, 5-phase structure, and required drills.</p></article>
+          <article><strong>Stats</strong><p>Tracks clean reps, spar wins, accuracy, conditioning rounds, mistakes, placement, and repeated problems.</p></article>
           <article><strong>Backup</strong><p>Your data lives on this device/browser. Export before changing devices or clearing browser data.</p></article>
-          <article><strong>Plan</strong><p>Shows the weekly training structure and the four-week build/deload cycle.</p></article>
+          <article><strong>Plan</strong><p>Choose a schedule preset or remap training focuses to match real park practice days.</p></article>
         </div>
       </section>
 
       <section className="panel">
-        <h3>Weakness targeting</h3>
-        <p className="guidance-text">Each log has a biggest problem. When the same problem repeats, the app promotes it as your current weakness target so your next session has a clear job.</p>
+        <h3>Coaching philosophy</h3>
+        <p className="guidance-text">Diagnose weakness, isolate variable, overload specifically, pressure test, measure outcome, repeat.</p>
       </section>
 
       <section className="panel">
         <h3>Weekly planning</h3>
-        <p className="guidance-text">Each day has one training focus. The monthly plan builds intensity for three weeks, then deloads in week four so practice stays sustainable.</p>
+        <p className="guidance-text">The default split runs six training days plus one recovery day. Use Plan to keep the same systems while moving competition, practice, or recovery around real park days.</p>
       </section>
 
       <section className="panel">

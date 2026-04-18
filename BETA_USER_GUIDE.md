@@ -2,12 +2,13 @@
 
 ## What This App Does
 
-Foam Fighter Mobile Coach helps you:
+Foam Fighter Mobile Coach runs an Olympic Coach foam fighting program for Warlord acceleration. It helps you:
 
-- see what to train today
+- see what to train today in a 6-day training / 1-day recovery split
+- customize the weekly schedule around real park practice
 - log a practice session quickly
 - notice repeated problems
-- track simple weekly stats
+- track clean reps, spar wins, accuracy, conditioning rounds, mistakes, and placement
 - back up your local training data
 
 It is meant to be used on your phone, especially right after practice.
@@ -18,11 +19,12 @@ When you open the app for the first time, you will see a short welcome screen.
 
 The basic flow is:
 
-1. Check `Home` for today's focus.
-2. Tap `Log`.
-3. Fill out the quick session form.
-4. Tap `Save session`.
-5. Check `Stats` to see what changed.
+1. Check `Home` for today's Olympic Coach focus.
+2. Use `Plan` if you need a preset or custom park schedule.
+3. Tap `Log`.
+4. Fill out the quick session form.
+5. Tap `Save session`.
+6. Check `Stats` to see what changed.
 
 You can reopen the help screen later from the `Help` tab.
 
@@ -30,13 +32,20 @@ You can reopen the help screen later from the `Help` tab.
 
 ### Home
 
-Home shows today's training focus and the session plan.
+Home shows today's training focus, system type, day goal, required drills, and 5-phase session plan.
 
 It also shows your current weakness target after you have enough logs.
 
 ### Log
 
-Log is where you save a session.
+Log is where you save a session. The app shows a small Olympic metrics block with fields that match the scheduled day:
+
+- Monday: clean reps, attempts, and successes for accuracy
+- Thursday: conditioning rounds, fatigue spar wins/losses, and mistakes
+- Friday: weakness mistakes and clean correction reps
+- Saturday: spar wins/losses, tournament placement, and mistakes
+
+The generic metric/result fields are still available for older logs or flexible notes.
 
 The required fields are shown first. Notes are optional. Tap `Add notes` if you want to record your biggest win and biggest problem.
 
@@ -58,12 +67,29 @@ They include:
 - total minutes
 - wins and losses
 - success rate
+- clean reps from structured clean-rep logging
+- spar wins from structured win/loss counts
+- accuracy from structured attempts/successes
+- conditioning rounds survived
+- mistake frequency
+- tournament placement
 - average energy
 - average confidence
 - repeated weakness target
 - focus breakdown
 
 If you have no logs yet, there are no real stats yet.
+
+Stats also includes a Weekly Coach Review. It compares the early part of the logged week to the later part of the week and produces deterministic guidance:
+
+- what improved
+- what declined or stagnated
+- the most repeated weakness/problem
+- what Friday weakness work should target
+- what to review on Sunday
+- what next week should emphasize
+
+This is rule-based, not AI. If there are too few logs, the app will say so clearly instead of inventing a verdict.
 
 ### Backup
 
@@ -87,15 +113,25 @@ Import options:
 
 ### Plan
 
-Plan shows the weekly training structure.
+Plan shows the weekly training structure and lets you customize scheduling.
 
-Each day has a focus, system, and metric. The four-week cycle builds for three weeks and then deloads.
+Use one of the presets:
+
+- Standard Olympic split
+- Fighters Practice Wednesday
+- Full Park Sunday
+
+You can also manually remap any weekday to any training focus. This is useful when park day, travel, or sparring partners do not match the default split.
+
+Each day has a focus, system, goal, required drills, and tracked metrics. The four-week cycle builds for three weeks and then deloads at 50% workload.
 
 ### Help
 
-Help explains what each tab does, how local data works, why backups matter, and how weakness targeting works.
+Help explains the Olympic Coach loop, how local data works, why backups matter, and how schedule customization works.
 
 ## Weakness Targeting
+
+The coaching loop is: diagnose weakness, isolate variable, overload specifically, pressure test, measure outcome, repeat.
 
 Every log can include a biggest problem.
 

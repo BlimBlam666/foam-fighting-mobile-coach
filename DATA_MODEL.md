@@ -8,8 +8,8 @@ Cloud sync is intentionally out of scope for this version.
 
 ## Version Constants
 
-- `APP_SCHEMA_VERSION = 1`
-- `SESSION_LOG_SCHEMA_VERSION = 1`
+- `APP_SCHEMA_VERSION = 3`
+- `SESSION_LOG_SCHEMA_VERSION = 2`
 - Primary localStorage key: `foam-fighter-app-data-v1`
 - Legacy prototype localStorage key: `foam-fighter-session-logs`
 
@@ -24,7 +24,7 @@ Every saved session log must contain all of these fields:
 ```js
 {
   id: 'log_uuid-or-legacy-id',
-  schemaVersion: 1,
+  schemaVersion: 2,
   createdAt: '2026-04-17T19:30:00.000Z',
   updatedAt: '2026-04-17T19:30:00.000Z',
   date: '2026-04-17',
@@ -32,20 +32,28 @@ Every saved session log must contain all of these fields:
   focus: 'Weakness',
   duration: 45,
   mainDrill: 'Bad blocks',
-  metricType: 'Weakness Success %',
+  metricType: 'Mistake frequency',
   result: '70',
   success: 'Yes',
   energy: 7,
   confidence: 7,
   win: 'Cleaner reset after pressure',
-  problem: 'Late retreat'
+  problem: 'Late retreat',
+  attempts: 80,
+  successes: 72,
+  cleanReps: 70,
+  sparWins: null,
+  sparLosses: null,
+  conditioningRoundsSurvived: null,
+  mistakeCount: 4,
+  tournamentPlacement: null
 }
 ```
 
 Validation rules:
 
 - `id`: non-empty string.
-- `schemaVersion`: must equal `1`.
+- `schemaVersion`: must equal `2`.
 - `createdAt`: valid ISO date-time string.
 - `updatedAt`: valid ISO date-time string.
 - `date`: `YYYY-MM-DD` string.
@@ -60,6 +68,16 @@ Validation rules:
 - `confidence`: finite number from `0` to `10`.
 - `win`: non-empty string.
 - `problem`: non-empty string.
+- `attempts`: optional finite number or `null`, minimum `0`.
+- `successes`: optional finite number or `null`, minimum `0`; when `attempts` exists, must be `<= attempts`.
+- `cleanReps`: optional finite number or `null`, minimum `0`.
+- `sparWins`: optional finite number or `null`, minimum `0`.
+- `sparLosses`: optional finite number or `null`, minimum `0`.
+- `conditioningRoundsSurvived`: optional finite number or `null`, minimum `0`.
+- `mistakeCount`: optional finite number or `null`, minimum `0`.
+- `tournamentPlacement`: optional finite number or `null`, minimum `1`.
+
+`metricType` and `result` remain required as a flexible fallback and for older logs. New Olympic Coach metrics should prefer the structured optional fields when available.
 
 New logs are created through `createSessionLog()` in `src/dataModel.js`, which adds IDs, timestamps, and schema version before validation.
 
@@ -68,7 +86,18 @@ New logs are created through `createSessionLog()` in `src/dataModel.js`, which a
 ```js
 {
   selectedWeek: 'Week 2',
-  demoMode: false
+  demoMode: false,
+  onboardingCompleted: false,
+  scheduleTemplate: 'standardOlympic',
+  customSchedule: {
+    Monday: 'technicalPrecision',
+    Tuesday: 'movementRange',
+    Wednesday: 'tacticalIq',
+    Thursday: 'pressureConditioning',
+    Friday: 'weaknessIsolation',
+    Saturday: 'competitionSimulation',
+    Sunday: 'activeRecovery'
+  }
 }
 ```
 
@@ -76,14 +105,18 @@ Validation rules:
 
 - `selectedWeek`: non-empty string.
 - `demoMode`: boolean.
+- `onboardingCompleted`: boolean.
+- `scheduleTemplate`: known preset ID or `custom`.
+- `customSchedule`: every weekday must map to a known Olympic Coach training focus ID.
 
 `demoMode` exists so sample data can be clearly labeled and separated from real user behavior.
+Schedule settings are exported/imported with `AppData` so real-world park scheduling survives reloads and backups.
 
 ### AppData
 
 ```js
 {
-  schemaVersion: 1,
+  schemaVersion: 3,
   logs: [SessionLog],
   settings: UserSettings,
   metadata: {
@@ -98,7 +131,7 @@ Validation rules:
 
 Validation rules:
 
-- `schemaVersion`: must equal `1`.
+- `schemaVersion`: must equal `3`.
 - `logs`: array of valid `SessionLog` objects.
 - `settings`: valid `UserSettings` object.
 - `metadata.appName`: non-empty string.
@@ -109,21 +142,35 @@ Validation rules:
 
 ### WeeklyPlanDay
 
-Weekly plan days are static app content, not user data. They live in `src/trainingData.js`.
+Weekly plan days are derived from static Olympic Coach focus definitions plus the user's saved schedule. They live in `src/trainingData.js`.
 
 ```js
 {
   day: 'Monday',
   short: 'Mon',
-  focus: 'Mechanics',
+  focus: 'Mechanics + Technical Precision',
   system: 'Neural',
   metric: 'Accuracy %',
+  trackedMetrics: ['Accuracy %', 'Clean reps', 'Form breakdown %'],
   color: 'rose',
-  goal: 'Perfect mechanics through one-shot precision work.',
+  goal: 'Perfect mechanics by isolating one shot.',
+  requiredDrills: ['Pick ONE shot only', '10 slow-motion reps'],
   phases: ['Mobility and wrist/elbow/shoulder prep'],
   drillIdeas: ['10 slow']
 }
 ```
+
+The default Olympic Coach split is:
+
+- Monday: Technical Precision / Neural
+- Tuesday: Movement and Range / Movement
+- Wednesday: Tactical IQ / Cognitive
+- Thursday: Pressure and Conditioning / Stress
+- Friday: Weakness Isolation / Adaptive
+- Saturday: Competition Simulation / Performance
+- Sunday: Active Recovery / Recovery
+
+Schedule presets are `standardOlympic`, `fightersPracticeWednesday`, and `fullParkSunday`. Manual remapping stores `scheduleTemplate: 'custom'`.
 
 ### PeriodizationWeek
 
@@ -240,6 +287,30 @@ Future import UI should call `parseImportedAppData(value)` from `src/dataModel.j
 
 ## Migration Flow
 
+### Version 1 AppData
+
+`AppData` schema version 1 is migrated to the current schema by adding the Olympic Coach schedule settings:
+
+- `scheduleTemplate: 'standardOlympic'`
+- `customSchedule`: the standard Olympic split
+
+Existing logs remain `SessionLog` schema version 1. The migration does not infer richer metric fields from old free-text logs.
+
+### Version 2 AppData
+
+`AppData` schema version 2 is migrated to schema version 3 by upgrading logs to `SessionLog` schema version 2. The structured Olympic metric fields are added as `null` when absent:
+
+- `attempts`
+- `successes`
+- `cleanReps`
+- `sparWins`
+- `sparLosses`
+- `conditioningRoundsSurvived`
+- `mistakeCount`
+- `tournamentPlacement`
+
+The migration intentionally does not infer structured values from old `metricType/result` pairs. Older data remains available through the fallback metric parser.
+
 ### Version 0 Prototype Data
 
 Prototype data was either:
@@ -254,7 +325,7 @@ The migration path is explicit:
 3. Each legacy item is migrated through `migrateLegacyLog(log, index)`.
 4. Migration adds:
    - stable migrated ID: `legacy_YYYYMMDD_index`
-   - `schemaVersion: 1`
+   - `schemaVersion: 2`
    - `createdAt`
    - `updatedAt`
 5. The migrated logs are wrapped in a new `AppData` object.
@@ -295,22 +366,27 @@ The UI currently derives these from real logs:
 - most repeated weakness/problem
 - focus breakdown
 - numeric average result by metric type
+- Olympic tracking averages, preferring structured fields:
+  - Clean reps from `cleanReps`, falling back to `Clean reps` result
+  - Spar wins % from `sparWins` / `sparLosses`, falling back to `Spar wins %` result
+  - Accuracy % from `successes` / `attempts`, falling back to `Accuracy %` result
+  - Conditioning rounds from `conditioningRoundsSurvived`, falling back to matching result
+  - Mistake frequency from `mistakeCount`, falling back to matching result
+  - Tournament placement from `tournamentPlacement`, falling back to matching result
 
 Removed from production-facing UI:
 
-- hard-coded accuracy/read/fatigue/recovery cards
+- hard-coded prototype tracking cards
 - hard-coded technique tracking rows
 
 ## Known Future Data Needs
 
-Some useful prototype metrics require richer logging fields before they can be real:
+Some useful Olympic Coach metrics still need richer fields before they can be fully precise:
 
-- technique attempts and successes
-- per-shot accuracy
-- fatigue-specific win rate
-- recovery score
-- read correctness
-- placement/bracket result
+- per-shot and per-quadrant accuracy
+- opponent/context for fatigue spar win/loss details
+- structured tournament bracket size and round result
+- read correctness and prediction timing
 - cause-of-death taxonomy separate from free-text `problem`
 
 Those should be added as explicit schema migrations rather than inferred from free text.
