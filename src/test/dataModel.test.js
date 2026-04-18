@@ -12,6 +12,14 @@ import {
 import { baseLogInput, makeAppData, makeLog } from './testUtils.js'
 
 describe('session log validation and parsing', () => {
+  it('defaults new users to Week 1 with no logs', () => {
+    const appData = makeAppData()
+
+    expect(appData.settings.selectedWeek).toBe('Week 1')
+    expect(appData.logs).toEqual([])
+    expect(appData.settings.demoMode).toBe(false)
+  })
+
   it('creates logs with stable ids, timestamps, and schema version', () => {
     const log = createSessionLog(baseLogInput, {
       id: 'log_fixed',

@@ -30,13 +30,15 @@ export function SaveStateBanner({ status, errors }) {
 export function DemoBanner() {
   return (
     <section className="demo-banner">
-      <strong>Demo data</strong>
-      <span>These logs are sample data. Saving a new session exits demo mode.</span>
+      <strong>Sample preview data</strong>
+      <span>These logs are examples, not your history. Saving a new session exits sample mode.</span>
     </section>
   )
 }
 
 export function TodayHero({ metrics, onLogNow, todayPlan }) {
+  const hasLogs = metrics.sessions > 0
+
   return (
     <section className={`hero-card hero-${todayPlan.color}`}>
       <div className="hero-row">
@@ -54,20 +56,31 @@ export function TodayHero({ metrics, onLogNow, todayPlan }) {
       </div>
 
       <div className="stats-grid compact-stats">
-        <div className="stat-card"><span>Sessions</span><strong>{metrics.sessions}</strong></div>
-        <div className="stat-card"><span>Success Rate</span><strong>{metrics.winRate}%</strong></div>
+        <div className="stat-card">
+          <span>Logged sessions</span>
+          <strong className={hasLogs ? '' : 'small-stat'}>{hasLogs ? metrics.sessions : 'No logs yet'}</strong>
+        </div>
+        <div className="stat-card">
+          <span>Real performance</span>
+          <strong className="small-stat">{hasLogs ? `${metrics.winRate}% success` : 'Starts after logging'}</strong>
+        </div>
       </div>
     </section>
   )
 }
 
-export function CoachFooter({ weaknessTarget }) {
+export function CoachFooter({ sessions, weaknessTarget }) {
+  const hasLogs = sessions > 0
+
   return (
     <footer className="coach-footer">
       <div>
-        <p className="eyebrow">Coach verdict</p>
-        <h4>Train the weakest variable next.</h4>
-        <p>Most repeated problem this week: <strong>{weaknessTarget}</strong>.</p>
+        <p className="eyebrow">{hasLogs ? 'Coach verdict' : 'Planned framework'}</p>
+        <h4>{hasLogs ? 'Train the weakest variable next.' : 'Log sessions to unlock a verdict.'}</h4>
+        <p>
+          {hasLogs ? 'Most repeated problem this week: ' : 'Your real weakness target appears after logging: '}
+          <strong>{weaknessTarget}</strong>.
+        </p>
       </div>
     </footer>
   )

@@ -46,11 +46,11 @@ export function HomeScreen({ logs, metrics, onLogClick, saveMessage, todayPlan }
           <p>{todayPlan.goal}</p>
         </div>
         <div className="callout success">
-          <strong>Tracked metrics</strong>
+          <strong>Planned metrics for this day</strong>
           <p>{todayPlan.trackedMetrics.join(', ')}</p>
         </div>
         <div className="callout warning">
-          <strong>Current weakness target</strong>
+          <strong>Weakness target from your logs</strong>
           <p>{logs.length === 0 ? 'Log a few sessions first. Repeated problems will show up here.' : metrics.weaknessTarget}</p>
         </div>
           <div className="chip-wrap">

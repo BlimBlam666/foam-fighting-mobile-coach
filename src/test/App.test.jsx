@@ -45,6 +45,20 @@ describe('app smoke and session logging flows', () => {
 
     expect(screen.getByRole('heading', { name: 'Warlord Coach' })).toBeInTheDocument()
     expect(screen.getByText('Saved on this device')).toBeInTheDocument()
+    expect(screen.getByText('Week 1')).toBeInTheDocument()
+    expect(screen.getByText('No logs yet')).toBeInTheDocument()
+    expect(screen.getByText('Starts after logging')).toBeInTheDocument()
+  })
+
+  it('shows a blank metrics state before any real logs exist', async () => {
+    const user = userEvent.setup()
+    renderSeededApp()
+
+    await openTab(user, 'Stats')
+
+    expect(screen.getByText('No metrics yet')).toBeInTheDocument()
+    expect(screen.getByText(/No training history has been logged/)).toBeInTheDocument()
+    expect(screen.queryByText('Weekly coach review')).not.toBeInTheDocument()
   })
 
   it('creates a log and persists it to localStorage', async () => {

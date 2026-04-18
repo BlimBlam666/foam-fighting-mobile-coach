@@ -85,7 +85,7 @@ New logs are created through `createSessionLog()` in `src/dataModel.js`, which a
 
 ```js
 {
-  selectedWeek: 'Week 2',
+  selectedWeek: 'Week 1',
   demoMode: false,
   onboardingCompleted: false,
   scheduleTemplate: 'standardOlympic',
@@ -346,7 +346,7 @@ Demo logs live in `src/trainingData.js` as `demoLogs`.
 Demo behavior:
 
 - First run starts with empty real data, not demo logs.
-- Demo data is loaded only when the user taps "Load optional demo data".
+- Demo data is loaded only when the user taps "Preview sample data".
 - Demo data is migrated through the same legacy migration function.
 - `settings.demoMode` is set to `true`.
 - Saving a real session sets `demoMode` back to `false`.

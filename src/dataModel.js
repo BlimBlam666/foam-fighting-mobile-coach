@@ -23,7 +23,7 @@ export function todayDate() {
 
 export function createDefaultSettings() {
   return {
-    selectedWeek: 'Week 2',
+    selectedWeek: 'Week 1',
     demoMode: false,
     onboardingCompleted: false,
     scheduleTemplate: defaultScheduleTemplateId,

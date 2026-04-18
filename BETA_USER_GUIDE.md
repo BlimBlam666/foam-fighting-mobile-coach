@@ -34,6 +34,8 @@ You can reopen the help screen later from the `Help` tab.
 
 Home shows today's training focus, system type, day goal, required drills, and 5-phase session plan.
 
+On a new install, Home starts with no training history. The plan is visible, but performance metrics begin only after you log real sessions.
+
 It also shows your current weakness target after you have enough logs.
 
 ### Log
@@ -123,7 +125,9 @@ Use one of the presets:
 
 You can also manually remap any weekday to any training focus. This is useful when park day, travel, or sparring partners do not match the default split.
 
-Each day has a focus, system, goal, required drills, and tracked metrics. The four-week cycle builds for three weeks and then deloads at 50% workload.
+Each day has a focus, system, goal, required drills, and tracked metrics. The app starts on Week 1 by default. The four-week cycle builds for three weeks and then deloads at 50% workload.
+
+The periodization bars are planned target load for the program, not completed user performance. Your real performance history appears in Stats after logging sessions.
 
 ### Help
 

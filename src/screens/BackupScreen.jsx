@@ -112,13 +112,13 @@ export function BackupScreen({
         <div className="panel-head wrap-head">
           <div>
             <h3>Destructive actions</h3>
-            <span className="subtle">Demo data and clearing logs are intentionally separate actions.</span>
+                  <span className="subtle">Sample preview data and clearing logs are intentionally separate actions.</span>
           </div>
         </div>
         <div className="backup-actions">
           <button className="ghost-btn danger-btn" onClick={onClearLogs} type="button">Clear all logs</button>
           {logs.length === 0 && (
-            <button className="secondary-btn" onClick={onLoadDemoData} type="button">Load optional demo data</button>
+            <button className="secondary-btn" onClick={onLoadDemoData} type="button">Preview sample data</button>
           )}
         </div>
       </section>

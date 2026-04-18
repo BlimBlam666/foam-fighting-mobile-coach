@@ -183,7 +183,7 @@ export function LogScreen({
           </div>
         )}
         {logs.length === 0 && (
-          <button className="secondary-btn" onClick={onLoadDemoData} type="button">Load optional demo data</button>
+          <button className="secondary-btn" onClick={onLoadDemoData} type="button">Preview sample data</button>
         )}
       </section>
 

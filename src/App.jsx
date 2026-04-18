@@ -110,7 +110,7 @@ export default function App() {
 
         {coach.tab === 'library' && <LibraryScreen />}
 
-        <CoachFooter weaknessTarget={coach.metrics.weaknessTarget} />
+        <CoachFooter sessions={coach.metrics.sessions} weaknessTarget={coach.metrics.weaknessTarget} />
         <BottomNav activeTab={coach.tab} onChangeTab={coach.setTab} />
 
         <LogEditorModal

@@ -11,6 +11,7 @@ The app is intentionally local-first: training data is stored in the current dev
 - Schedule presets and manual weekday remapping for real park practice.
 - Per-log edit and delete with confirmation.
 - Weekly metrics for clean reps, spar wins, accuracy, conditioning rounds, mistakes, and placement.
+- Clean first-run state with Week 1 selected and no sample history unless demo data is explicitly loaded.
 - Weakness targeting based on repeated logged problems.
 - Weekly plan and periodization reference.
 - First-run onboarding and persistent help screen.

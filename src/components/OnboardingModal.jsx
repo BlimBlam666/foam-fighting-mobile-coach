@@ -8,7 +8,7 @@ export function OnboardingModal({ onDismiss, onOpenHelp, onStartLog, show }) {
       <section className="edit-sheet onboarding-sheet">
         <p className="eyebrow">Welcome</p>
         <h3>Olympic Coach: train, log, adjust.</h3>
-        <p className="guidance-text">Use the 6-day Warlord acceleration program to acquire skill fast without burning out.</p>
+        <p className="guidance-text">Use the 6-day Warlord acceleration program to acquire skill fast without burning out. The app starts blank until you log real sessions or choose sample preview data.</p>
 
         <div className="onboarding-steps">
           <article><strong>1. Check Home</strong><span>See today's focus, system type, goal, and required drills.</span></article>

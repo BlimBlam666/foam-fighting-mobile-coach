@@ -80,8 +80,12 @@ export function PlanScreen({
 
       <section className="panel">
         <div className="panel-head">
-          <h3>Monthly periodization</h3>
-          <span className="subtle">Week 1-3 build; Week 4 deloads at 50% workload.</span>
+          <h3>Monthly periodization targets</h3>
+          <span className="subtle">Planned training load, not completed user performance.</span>
+        </div>
+        <div className="callout warning">
+          <strong>What these bars mean</strong>
+          <p>These are target intensity and volume levels for the planned program. Week 1-3 build skill load; Week 4 is a planned deload at 50% workload.</p>
         </div>
         <div className="stack small-gap">
           {phaseWeeks.map((week) => (
@@ -91,12 +95,12 @@ export function PlanScreen({
                 <span className="pill neutral">{week.focus}</span>
               </div>
               <div className="mini-metric">
-                <span>Intensity</span>
+                <span>Target intensity</span>
                 <span>{week.intensity}%</span>
               </div>
               <div className="bar"><div className="fill warn" style={{ width: `${week.intensity}%` }} /></div>
               <div className="mini-metric">
-                <span>Volume</span>
+                <span>Target volume</span>
                 <span>{week.volume}%</span>
               </div>
               <div className="bar"><div className="fill good" style={{ width: `${week.volume}%` }} /></div>

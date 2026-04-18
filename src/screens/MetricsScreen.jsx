@@ -10,11 +10,13 @@ export function MetricsScreen({ logs, metrics, onExportLogs, onLogClick }) {
       {logs.length === 0 && (
         <section className="panel empty-state-panel">
           <h3>No metrics yet</h3>
-          <p>Metrics appear after you save session logs. Start with one quick log after practice.</p>
+          <p>No training history has been logged on this device yet. The Olympic Coach plan is a planned framework; this screen shows real performance only after you save logs.</p>
           <button className="primary-btn" onClick={onLogClick} type="button">Log a session</button>
         </section>
       )}
 
+      {logs.length > 0 && (
+      <>
       <section className="panel metric-hero">
         <div className="panel-head wrap-head">
           <div>
@@ -152,6 +154,8 @@ export function MetricsScreen({ logs, metrics, onExportLogs, onLogClick }) {
           ))}
         </div>
       </section>
+      </>
+      )}
     </div>
   )
 }
