@@ -1,4 +1,5 @@
 import React from 'react'
+import { MISTAKE_TAXONOMY } from '../dataModel.js'
 
 export function LogEditorModal({
   editError,
@@ -61,6 +62,13 @@ export function LogEditorModal({
             <input value={editForm.mainDrill} onChange={(event) => onUpdateField('mainDrill', event.target.value)} />
           </label>
 
+          <label>
+            <span>Primary mistake category</span>
+            <select value={editForm.mistakeCategory} onChange={(event) => onUpdateField('mistakeCategory', event.target.value)}>
+              {MISTAKE_TAXONOMY.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+            </select>
+          </label>
+
           <div className="form-grid two">
             <label>
               <span>Metric type</span>
@@ -113,7 +121,7 @@ export function LogEditorModal({
             <textarea value={editForm.win} onChange={(event) => onUpdateField('win', event.target.value)} />
           </label>
           <label>
-            <span>Biggest problem</span>
+            <span>Mistake detail</span>
             <textarea value={editForm.problem} onChange={(event) => onUpdateField('problem', event.target.value)} />
           </label>
 

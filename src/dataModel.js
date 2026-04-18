@@ -1,9 +1,22 @@
 import { createScheduleFromTemplate, defaultScheduleTemplateId, normalizeSchedule, scheduleTemplates } from './trainingData.js'
 
-export const APP_SCHEMA_VERSION = 3
-export const SESSION_LOG_SCHEMA_VERSION = 2
+export const APP_SCHEMA_VERSION = 4
+export const SESSION_LOG_SCHEMA_VERSION = 3
 export const STORAGE_KEY = 'foam-fighter-app-data-v1'
 export const LEGACY_LOGS_STORAGE_KEY = 'foam-fighter-session-logs'
+export const DEFAULT_MISTAKE_CATEGORY = 'otherCustom'
+export const MISTAKE_TAXONOMY = [
+  { id: 'badBlocks', label: 'Bad blocks' },
+  { id: 'panicUnderPressure', label: 'Panic under pressure' },
+  { id: 'slowFootwork', label: 'Slow footwork' },
+  { id: 'poorRangeControl', label: 'Poor range control' },
+  { id: 'weakOffside', label: 'Weak offside' },
+  { id: 'overcommitment', label: 'Overcommitment' },
+  { id: 'lateReads', label: 'Late reads' },
+  { id: 'conditioningBreakdown', label: 'Conditioning breakdown' },
+  { id: 'formBreakdown', label: 'Form breakdown' },
+  { id: DEFAULT_MISTAKE_CATEGORY, label: 'Other / custom' },
+]
 
 export function createId(prefix = 'log') {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -66,6 +79,7 @@ export function createSessionLog(input, options = {}) {
     confidence: Number(input.confidence),
     win: input.win,
     problem: input.problem,
+    mistakeCategory: normalizeMistakeCategoryInput(input.mistakeCategory, input.problem),
     attempts: optionalNumber(input.attempts),
     successes: optionalNumber(input.successes),
     cleanReps: optionalNumber(input.cleanReps),
@@ -108,6 +122,7 @@ export function updateSessionLog(existingLog, input, options = {}) {
     confidence: Number(input.confidence),
     win: input.win,
     problem: input.problem,
+    mistakeCategory: normalizeMistakeCategoryInput(input.mistakeCategory, input.problem),
     attempts: optionalNumber(input.attempts),
     successes: optionalNumber(input.successes),
     cleanReps: optionalNumber(input.cleanReps),
@@ -148,6 +163,7 @@ export function validateSessionLog(log) {
   requireFiniteNumber(log, 'confidence', errors, { min: 0, max: 10 })
   requireString(log, 'win', errors)
   requireString(log, 'problem', errors)
+  requireMistakeCategory(log, errors)
   validateOptionalNumber(log, 'attempts', errors, { min: 0 })
   validateOptionalNumber(log, 'successes', errors, { min: 0 })
   validateOptionalNumber(log, 'cleanReps', errors, { min: 0 })
@@ -256,7 +272,7 @@ export function parseImportedAppData(value) {
     return migrateLegacyLogArray(value.logs)
   }
 
-  if (value.schemaVersion === 1 || value.schemaVersion === 2) {
+  if (value.schemaVersion === 1 || value.schemaVersion === 2 || value.schemaVersion === 3) {
     const migrated = migrateAppDataToCurrent(value)
     const result = validateAppData(migrated)
     return result.ok
@@ -335,6 +351,7 @@ export function migrateSessionLogToCurrent(log) {
   return {
     ...log,
     schemaVersion: SESSION_LOG_SCHEMA_VERSION,
+    mistakeCategory: normalizeMistakeCategory(log.mistakeCategory, log.problem),
     attempts: optionalNumber(log.attempts),
     successes: optionalNumber(log.successes),
     cleanReps: optionalNumber(log.cleanReps),
@@ -450,6 +467,7 @@ export function migrateLegacyLog(log, index = 0) {
       confidence: Number(log.confidence),
       win: String(log.win),
       problem: String(log.problem),
+      mistakeCategory: normalizeMistakeCategory(log.mistakeCategory, log.problem),
     },
     {
       id: `legacy_${String(log.date).replaceAll('-', '')}_${index + 1}`,
@@ -458,6 +476,43 @@ export function migrateLegacyLog(log, index = 0) {
       now: createdAt,
     },
   )
+}
+
+export function getMistakeCategoryLabel(categoryId) {
+  return MISTAKE_TAXONOMY.find((item) => item.id === categoryId)?.label || MISTAKE_TAXONOMY.find((item) => item.id === DEFAULT_MISTAKE_CATEGORY).label
+}
+
+export function getMistakeDisplay(log) {
+  const category = normalizeMistakeCategory(log?.mistakeCategory, log?.problem)
+  if (category !== DEFAULT_MISTAKE_CATEGORY) return getMistakeCategoryLabel(category)
+
+  const fallback = normalizeProblemText(log?.problem)
+  if (fallback) return fallback
+  return getMistakeCategoryLabel(DEFAULT_MISTAKE_CATEGORY)
+}
+
+export function normalizeMistakeCategory(categoryId, problem = '') {
+  if (isKnownMistakeCategory(categoryId)) return categoryId
+  return inferMistakeCategoryFromProblem(problem)
+}
+
+export function inferMistakeCategoryFromProblem(problem) {
+  const text = normalizeProblemText(problem).toLowerCase()
+  if (!text) return DEFAULT_MISTAKE_CATEGORY
+
+  const matches = [
+    { id: 'panicUnderPressure', keywords: ['panic', 'pressure panic', 'froze', 'freezing'] },
+    { id: 'conditioningBreakdown', keywords: ['conditioning', 'fatigue', 'tired', 'gassed', 'winded'] },
+    { id: 'poorRangeControl', keywords: ['range', 'retreat', 'reentry', 'too close', 'too far'] },
+    { id: 'slowFootwork', keywords: ['slow footwork', 'footwork', 'crossed feet', 'stuck feet', 'feet slow'] },
+    { id: 'weakOffside', keywords: ['offside', 'off-side', 'weak side'] },
+    { id: 'overcommitment', keywords: ['overcommit', 'over committed', 'overcommitted', 'lunged too far'] },
+    { id: 'lateReads', keywords: ['late read', 'late reads', 'read late', 'prediction', 'misread'] },
+    { id: 'badBlocks', keywords: ['bad block', 'bad blocks', 'block recovery', 'late block', 'missed block'] },
+    { id: 'formBreakdown', keywords: ['form breakdown', 'form broke', 'mechanics', 'telegraph', 'too upright'] },
+  ]
+
+  return matches.find((item) => item.keywords.some((keyword) => text.includes(keyword)))?.id || DEFAULT_MISTAKE_CATEGORY
 }
 
 function dateToIso(value) {
@@ -487,6 +542,12 @@ function requireNumber(object, key, errors, expected) {
   }
 }
 
+function requireMistakeCategory(log, errors) {
+  if (!isKnownMistakeCategory(log.mistakeCategory)) {
+    errors.push(`mistakeCategory must be one of: ${MISTAKE_TAXONOMY.map((item) => item.id).join(', ')}`)
+  }
+}
+
 function requireFiniteNumber(object, key, errors, options = {}) {
   if (typeof object[key] !== 'number' || !Number.isFinite(object[key])) {
     errors.push(`${key} must be a finite number`)
@@ -501,6 +562,23 @@ function optionalNumber(value) {
   if (value === undefined || value === null || value === '') return null
   const number = Number(value)
   return Number.isFinite(number) ? number : value
+}
+
+function normalizeMistakeCategoryInput(categoryId, problem = '') {
+  if (categoryId === undefined || categoryId === null || categoryId === '') {
+    return inferMistakeCategoryFromProblem(problem)
+  }
+  return categoryId
+}
+
+function isKnownMistakeCategory(categoryId) {
+  return MISTAKE_TAXONOMY.some((item) => item.id === categoryId)
+}
+
+function normalizeProblemText(problem) {
+  if (typeof problem !== 'string') return ''
+  const trimmed = problem.trim()
+  return trimmed.toLowerCase() === 'no issue noted' ? '' : trimmed
 }
 
 function validateOptionalNumber(object, key, errors, options = {}) {

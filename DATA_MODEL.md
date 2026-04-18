@@ -8,8 +8,8 @@ Cloud sync is intentionally out of scope for this version.
 
 ## Version Constants
 
-- `APP_SCHEMA_VERSION = 3`
-- `SESSION_LOG_SCHEMA_VERSION = 2`
+- `APP_SCHEMA_VERSION = 4`
+- `SESSION_LOG_SCHEMA_VERSION = 3`
 - Primary localStorage key: `foam-fighter-app-data-v1`
 - Legacy prototype localStorage key: `foam-fighter-session-logs`
 
@@ -24,7 +24,7 @@ Every saved session log must contain all of these fields:
 ```js
 {
   id: 'log_uuid-or-legacy-id',
-  schemaVersion: 2,
+  schemaVersion: 3,
   createdAt: '2026-04-17T19:30:00.000Z',
   updatedAt: '2026-04-17T19:30:00.000Z',
   date: '2026-04-17',
@@ -39,6 +39,7 @@ Every saved session log must contain all of these fields:
   confidence: 7,
   win: 'Cleaner reset after pressure',
   problem: 'Late retreat',
+  mistakeCategory: 'poorRangeControl',
   attempts: 80,
   successes: 72,
   cleanReps: 70,
@@ -53,7 +54,7 @@ Every saved session log must contain all of these fields:
 Validation rules:
 
 - `id`: non-empty string.
-- `schemaVersion`: must equal `2`.
+- `schemaVersion`: must equal `3`.
 - `createdAt`: valid ISO date-time string.
 - `updatedAt`: valid ISO date-time string.
 - `date`: `YYYY-MM-DD` string.
@@ -67,7 +68,8 @@ Validation rules:
 - `energy`: finite number from `0` to `10`.
 - `confidence`: finite number from `0` to `10`.
 - `win`: non-empty string.
-- `problem`: non-empty string.
+- `problem`: non-empty string. This is optional user-facing detail, but the stored record keeps a non-empty fallback such as `No issue noted`.
+- `mistakeCategory`: one controlled taxonomy ID.
 - `attempts`: optional finite number or `null`, minimum `0`.
 - `successes`: optional finite number or `null`, minimum `0`; when `attempts` exists, must be `<= attempts`.
 - `cleanReps`: optional finite number or `null`, minimum `0`.
@@ -78,6 +80,21 @@ Validation rules:
 - `tournamentPlacement`: optional finite number or `null`, minimum `1`.
 
 `metricType` and `result` remain required as a flexible fallback and for older logs. New Olympic Coach metrics should prefer the structured optional fields when available.
+
+The controlled mistake taxonomy is:
+
+- `badBlocks`: Bad blocks
+- `panicUnderPressure`: Panic under pressure
+- `slowFootwork`: Slow footwork
+- `poorRangeControl`: Poor range control
+- `weakOffside`: Weak offside
+- `overcommitment`: Overcommitment
+- `lateReads`: Late reads
+- `conditioningBreakdown`: Conditioning breakdown
+- `formBreakdown`: Form breakdown
+- `otherCustom`: Other / custom
+
+New logs use one primary `mistakeCategory`. Free text in `problem` is retained as optional detail or as a fallback for older custom logs.
 
 New logs are created through `createSessionLog()` in `src/dataModel.js`, which adds IDs, timestamps, and schema version before validation.
 
@@ -116,7 +133,7 @@ Schedule settings are exported/imported with `AppData` so real-world park schedu
 
 ```js
 {
-  schemaVersion: 3,
+  schemaVersion: 4,
   logs: [SessionLog],
   settings: UserSettings,
   metadata: {
@@ -131,7 +148,7 @@ Schedule settings are exported/imported with `AppData` so real-world park schedu
 
 Validation rules:
 
-- `schemaVersion`: must equal `3`.
+- `schemaVersion`: must equal `4`.
 - `logs`: array of valid `SessionLog` objects.
 - `settings`: valid `UserSettings` object.
 - `metadata.appName`: non-empty string.
@@ -311,6 +328,16 @@ Existing logs remain `SessionLog` schema version 1. The migration does not infer
 
 The migration intentionally does not infer structured values from old `metricType/result` pairs. Older data remains available through the fallback metric parser.
 
+### Version 3 AppData
+
+`AppData` schema version 3 is migrated to schema version 4 by upgrading logs to `SessionLog` schema version 3. Each log receives a `mistakeCategory`.
+
+Migration mapping is conservative:
+
+- clear matches like `slow footwork`, `panic`, `offside`, `overcommit`, `late read`, `bad block`, `fatigue`, `range`, `retreat`, or `form breakdown` are mapped to the matching taxonomy ID.
+- unknown or ambiguous free text becomes `otherCustom`.
+- the original `problem` text is preserved unchanged for detail and fallback display.
+
 ### Version 0 Prototype Data
 
 Prototype data was either:
@@ -325,7 +352,7 @@ The migration path is explicit:
 3. Each legacy item is migrated through `migrateLegacyLog(log, index)`.
 4. Migration adds:
    - stable migrated ID: `legacy_YYYYMMDD_index`
-   - `schemaVersion: 2`
+   - `schemaVersion: 3`
    - `createdAt`
    - `updatedAt`
 5. The migrated logs are wrapped in a new `AppData` object.
@@ -363,7 +390,7 @@ The UI currently derives these from real logs:
 - success rate
 - average energy
 - average confidence
-- most repeated weakness/problem
+- most repeated weakness/mistake category
 - focus breakdown
 - numeric average result by metric type
 - Olympic tracking averages, preferring structured fields:
@@ -387,6 +414,6 @@ Some useful Olympic Coach metrics still need richer fields before they can be fu
 - opponent/context for fatigue spar win/loss details
 - structured tournament bracket size and round result
 - read correctness and prediction timing
-- cause-of-death taxonomy separate from free-text `problem`
+- richer mistake taxonomy with severity, context, and cause-of-death fields
 
 Those should be added as explicit schema migrations rather than inferred from free text.

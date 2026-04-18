@@ -21,7 +21,7 @@ describe('derived metrics', () => {
     expect(metrics.winRate).toBe(80)
     expect(metrics.avgEnergy).toBe(7)
     expect(metrics.avgConfidence).toBe(6)
-    expect(metrics.weaknessTarget).toBe('Late retreat')
+    expect(metrics.weaknessTarget).toBe('Poor range control')
     expect(metrics.focusStats.find((row) => row.focus === 'Defense')).toMatchObject({ sessions: 2, wins: 1, minutes: 75, winRate: 50 })
     expect(metrics.metricTypeStats.find((row) => row.metricType === 'Clean blocks')).toMatchObject({ count: 2, averageResult: 70 })
     expect(metrics.metricTypeStats.find((row) => row.metricType === 'Notes')).toMatchObject({ count: 1, averageResult: null })

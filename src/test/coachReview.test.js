@@ -15,7 +15,7 @@ describe('weekly coach review', () => {
 
     expect(review.sessions).toBe(4)
     expect(review.minutes).toBe(315)
-    expect(review.weakness).toMatchObject({ label: 'slow footwork', count: 3, enoughData: true })
+    expect(review.weakness).toMatchObject({ label: 'Slow footwork', count: 3, enoughData: true })
     expect(review.trends.cleanReps).toMatchObject({ direction: 'up', startAverage: 45, endAverage: 75 })
     expect(review.trends.accuracy).toMatchObject({ direction: 'up', startAverage: 73, endAverage: 88 })
     expect(review.trends.sparPerformance).toMatchObject({ direction: 'up', startAverage: 45, endAverage: 73 })
@@ -24,16 +24,29 @@ describe('weekly coach review', () => {
     expect(review.nextWeekFocus).toContain('Keep the Olympic split steady')
   })
 
-  it('prioritizes repeated weakness problems deterministically', () => {
+  it('prioritizes repeated structured mistake categories deterministically', () => {
     const logs = [
-      makeLog({ problem: 'panic under pressure' }, { id: 'log_1' }),
-      makeLog({ problem: 'slow footwork' }, { id: 'log_2' }),
-      makeLog({ problem: 'slow footwork' }, { id: 'log_3' }),
+      makeLog({ mistakeCategory: 'panicUnderPressure', problem: 'panic under pressure' }, { id: 'log_1' }),
+      makeLog({ mistakeCategory: 'slowFootwork', problem: 'slow footwork' }, { id: 'log_2' }),
+      makeLog({ mistakeCategory: 'slowFootwork', problem: 'late first step' }, { id: 'log_3' }),
       makeLog({ problem: 'No issue noted' }, { id: 'log_4' }),
     ]
 
     expect(prioritizeWeakness(logs)).toMatchObject({
-      label: 'slow footwork',
+      label: 'Slow footwork',
+      count: 2,
+      enoughData: true,
+    })
+  })
+
+  it('falls back to free-text weakness for old custom logs', () => {
+    const logs = [
+      makeLog({ mistakeCategory: 'otherCustom', problem: 'weird grip timing' }, { id: 'log_1' }),
+      makeLog({ mistakeCategory: 'otherCustom', problem: 'weird grip timing' }, { id: 'log_2' }),
+    ]
+
+    expect(prioritizeWeakness(logs)).toMatchObject({
+      label: 'weird grip timing',
       count: 2,
       enoughData: true,
     })

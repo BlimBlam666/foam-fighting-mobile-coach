@@ -3,8 +3,10 @@ import {
   APP_SCHEMA_VERSION,
   SESSION_LOG_SCHEMA_VERSION,
   createSessionLog,
+  DEFAULT_MISTAKE_CATEGORY,
   mergeImportedAppData,
   migrateLegacyLogArray,
+  parseImportedAppData,
   parseImportedAppDataJson,
   updateSessionLog,
   validateSessionLog,
@@ -32,6 +34,7 @@ describe('session log validation and parsing', () => {
       createdAt: '2026-04-17T12:00:00.000Z',
       updatedAt: '2026-04-17T12:00:00.000Z',
       date: '2026-04-17',
+      mistakeCategory: 'poorRangeControl',
     })
     expect(validateSessionLog(log)).toEqual({ ok: true, value: log })
   })
@@ -39,6 +42,7 @@ describe('session log validation and parsing', () => {
   it('rejects invalid session log fields clearly', () => {
     expect(() => createSessionLog({ ...baseLogInput, energy: 99 })).toThrow('energy must be <= 10')
     expect(() => createSessionLog({ ...baseLogInput, success: 'Maybe' })).toThrow('success must be "Yes" or "No"')
+    expect(() => createSessionLog({ ...baseLogInput, mistakeCategory: 'wildGuess' })).toThrow('mistakeCategory must be one of')
   })
 
   it('rejects empty, invalid, and unsupported imported data', () => {
@@ -85,6 +89,7 @@ describe('session log validation and parsing', () => {
       cleanReps: 70,
       sparWins: null,
       mistakeCount: 4,
+      mistakeCategory: 'poorRangeControl',
     })
   })
 })
@@ -102,6 +107,38 @@ describe('migration behavior', () => {
       schemaVersion: SESSION_LOG_SCHEMA_VERSION,
       createdAt: '2026-04-17T12:00:00.000Z',
       updatedAt: '2026-04-17T12:00:00.000Z',
+      mistakeCategory: 'poorRangeControl',
+    })
+  })
+
+  it('migrates AppData v3 logs into the mistake taxonomy without unsafe guessing', () => {
+    const oldLog = {
+      ...makeLog({ problem: 'slow footwork' }),
+      schemaVersion: 2,
+    }
+    delete oldLog.mistakeCategory
+    const unknownOldLog = {
+      ...makeLog({ problem: 'weird grip timing' }, { id: 'log_unknown' }),
+      schemaVersion: 2,
+    }
+    delete unknownOldLog.mistakeCategory
+
+    const parsed = parseImportedAppData({
+      ...makeAppData([oldLog, unknownOldLog]),
+      schemaVersion: 3,
+      logs: [oldLog, unknownOldLog],
+    })
+
+    expect(parsed.ok).toBe(true)
+    expect(parsed.migrated).toBe(true)
+    expect(parsed.value.logs[0]).toMatchObject({
+      schemaVersion: SESSION_LOG_SCHEMA_VERSION,
+      mistakeCategory: 'slowFootwork',
+    })
+    expect(parsed.value.logs[1]).toMatchObject({
+      schemaVersion: SESSION_LOG_SCHEMA_VERSION,
+      mistakeCategory: DEFAULT_MISTAKE_CATEGORY,
+      problem: 'weird grip timing',
     })
   })
 
@@ -128,6 +165,7 @@ describe('log editing and import merge behavior', () => {
     expect(updated.updatedAt).toBe('2026-04-18T10:00:00.000Z')
     expect(updated.duration).toBe(60)
     expect(updated.result).toBe('88')
+    expect(updated.mistakeCategory).toBe('poorRangeControl')
   })
 
   it('rejects invalid edits through the same validation rules', () => {

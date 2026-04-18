@@ -1,3 +1,5 @@
+import { DEFAULT_MISTAKE_CATEGORY, getMistakeCategoryLabel, normalizeMistakeCategory } from './dataModel.js'
+
 export function calculateDerivedMetrics(logs) {
   const wins = logs.filter((log) => log.success === 'Yes').length
   const losses = logs.filter((log) => log.success === 'No').length
@@ -6,7 +8,7 @@ export function calculateDerivedMetrics(logs) {
   const winRate = wins + losses === 0 ? 0 : Math.round((wins / (wins + losses)) * 100)
   const avgEnergy = average(logs.map((log) => log.energy))
   const avgConfidence = average(logs.map((log) => log.confidence))
-  const weaknessTarget = mostCommon(logs.map((log) => log.problem).filter(Boolean)) || 'No weakness identified yet'
+  const weaknessTarget = mostCommon(logs.map(weaknessLabelForLog).filter(Boolean)) || 'No weakness identified yet'
   const focusStats = calculateFocusStats(logs)
   const metricTypeStats = calculateMetricTypeStats(logs)
   const programTracking = calculateProgramTracking(logs, metricTypeStats)
@@ -122,4 +124,14 @@ function mostCommon(values) {
   }, {})
 
   return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0]
+}
+
+function weaknessLabelForLog(log) {
+  const category = normalizeMistakeCategory(log.mistakeCategory, log.problem)
+  if (category !== DEFAULT_MISTAKE_CATEGORY) return getMistakeCategoryLabel(category)
+
+  if (typeof log.problem !== 'string') return ''
+  const problem = log.problem.trim()
+  if (!problem || problem.toLowerCase() === 'no issue noted') return ''
+  return problem
 }

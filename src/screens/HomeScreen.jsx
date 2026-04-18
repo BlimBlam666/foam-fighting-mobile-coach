@@ -51,7 +51,7 @@ export function HomeScreen({ logs, metrics, onLogClick, saveMessage, todayPlan }
         </div>
         <div className="callout warning">
           <strong>Weakness target from your logs</strong>
-          <p>{logs.length === 0 ? 'Log a few sessions first. Repeated problems will show up here.' : metrics.weaknessTarget}</p>
+          <p>{logs.length === 0 ? 'Log a few sessions first. Repeated mistake categories will show up here.' : metrics.weaknessTarget}</p>
         </div>
           <div className="chip-wrap">
           {todayPlan.requiredDrills.map((item) => (

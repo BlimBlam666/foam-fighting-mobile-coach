@@ -64,7 +64,7 @@ export function MetricsScreen({ logs, metrics, onExportLogs, onLogClick }) {
           <div className="stat-card">
             <span>Main weakness</span>
             <strong className="small-stat">{review.weakness.label}</strong>
-            <span>{review.weakness.count ? `${review.weakness.count} mentions` : 'No repeated problem yet'}</span>
+            <span>{review.weakness.count ? `${review.weakness.count} mentions` : 'No repeated mistake yet'}</span>
           </div>
         </div>
       </section>

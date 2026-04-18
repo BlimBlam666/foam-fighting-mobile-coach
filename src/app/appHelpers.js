@@ -1,4 +1,4 @@
-import { todayDate } from '../dataModel.js'
+import { DEFAULT_MISTAKE_CATEGORY, normalizeMistakeCategory, todayDate } from '../dataModel.js'
 
 export function todayIndex() {
   const day = new Date().getDay()
@@ -19,6 +19,7 @@ export function initialLogForm(plan) {
     confidence: '7',
     win: '',
     problem: '',
+    mistakeCategory: DEFAULT_MISTAKE_CATEGORY,
     attempts: '',
     successes: '',
     cleanReps: '',
@@ -44,6 +45,7 @@ export function formFromLog(log) {
     confidence: String(log.confidence),
     win: log.win,
     problem: log.problem,
+    mistakeCategory: normalizeMistakeCategory(log.mistakeCategory, log.problem),
     attempts: valueToFormString(log.attempts),
     successes: valueToFormString(log.successes),
     cleanReps: valueToFormString(log.cleanReps),

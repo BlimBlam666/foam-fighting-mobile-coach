@@ -7,7 +7,7 @@ Foam Fighter Mobile Coach runs an Olympic Coach foam fighting program for Warlor
 - see what to train today in a 6-day training / 1-day recovery split
 - customize the weekly schedule around real park practice
 - log a practice session quickly
-- notice repeated problems
+- notice repeated mistake patterns
 - track clean reps, spar wins, accuracy, conditioning rounds, mistakes, and placement
 - back up your local training data
 
@@ -49,7 +49,7 @@ Log is where you save a session. The app shows a small Olympic metrics block wit
 
 The generic metric/result fields are still available for older logs or flexible notes.
 
-The required fields are shown first. Notes are optional. Tap `Add notes` if you want to record your biggest win and biggest problem.
+The required fields are shown first. Choose one primary mistake category so the coach can spot repeat patterns. Notes are optional. Tap `Add notes` if you want to record your biggest win and extra mistake detail.
 
 You can also edit old logs here:
 
@@ -77,7 +77,7 @@ They include:
 - tournament placement
 - average energy
 - average confidence
-- repeated weakness target
+- repeated weakness target from the controlled mistake category
 - focus breakdown
 
 If you have no logs yet, there are no real stats yet.
@@ -86,7 +86,7 @@ Stats also includes a Weekly Coach Review. It compares the early part of the log
 
 - what improved
 - what declined or stagnated
-- the most repeated weakness/problem
+- the most repeated weakness/mistake category
 - what Friday weakness work should target
 - what to review on Sunday
 - what next week should emphasize
@@ -137,13 +137,13 @@ Help explains the Olympic Coach loop, how local data works, why backups matter, 
 
 The coaching loop is: diagnose weakness, isolate variable, overload specifically, pressure test, measure outcome, repeat.
 
-Every log can include a biggest problem.
+Every log includes one primary mistake category, such as `Slow footwork`, `Bad blocks`, or `Panic under pressure`. You can add optional free-text detail when something does not fit cleanly.
 
-When the same problem appears repeatedly, the app uses it as your weakness target. That gives your next practice a clear job.
+When the same category appears repeatedly, the app uses it as your weakness target. That gives your next practice a clear job.
 
 Example:
 
-If several logs mention `Late retreat`, the coach verdict will point you toward fixing late retreat.
+If several logs use `Poor range control`, the coach verdict will point you toward fixing range and retreat timing.
 
 ## Tips For Fast Logging
 
@@ -151,7 +151,7 @@ If several logs mention `Late retreat`, the coach verdict will point you toward 
 - Enter minutes, main drill, result, success, energy, and confidence.
 - Skip notes when you are tired.
 - Add notes later by editing the log.
-- Use the same words for repeated problems so weakness targeting works better.
+- Pick the closest mistake category first, then add detail only if it helps.
 
 ## Important Data Warning
 

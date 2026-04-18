@@ -1,3 +1,5 @@
+import { DEFAULT_MISTAKE_CATEGORY, getMistakeCategoryLabel, normalizeMistakeCategory } from './dataModel.js'
+
 export function calculateWeeklyCoachReview(logs, options = {}) {
   const weekLogs = getReviewLogs(logs, options)
   const sortedLogs = [...weekLogs].sort((a, b) => a.date.localeCompare(b.date))
@@ -29,9 +31,9 @@ export function calculateWeeklyCoachReview(logs, options = {}) {
 
 export function prioritizeWeakness(logs) {
   const counts = logs.reduce((acc, log) => {
-    const problem = normalizeProblem(log.problem)
-    if (!problem) return acc
-    acc[problem] = (acc[problem] || 0) + 1
+    const weakness = weaknessLabelForLog(log)
+    if (!weakness) return acc
+    acc[weakness] = (acc[weakness] || 0) + 1
     return acc
   }, {})
 
@@ -177,6 +179,12 @@ function getReviewLogs(logs, options) {
 function buildRangeLabel(logs) {
   if (!logs.length) return 'No logged week yet'
   return `${logs[0].date} to ${logs.at(-1).date}`
+}
+
+function weaknessLabelForLog(log) {
+  const category = normalizeMistakeCategory(log.mistakeCategory, log.problem)
+  if (category !== DEFAULT_MISTAKE_CATEGORY) return getMistakeCategoryLabel(category)
+  return normalizeProblem(log.problem)
 }
 
 function normalizeProblem(problem) {

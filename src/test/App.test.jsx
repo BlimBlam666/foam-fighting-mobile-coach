@@ -14,13 +14,16 @@ async function openTab(user, name) {
   await user.click(screen.getByRole('button', { name }))
 }
 
-async function createLogThroughUi(user, { day, mainDrill = 'Shield side entries', result = '84', cleanReps } = {}) {
+async function createLogThroughUi(user, { day, mainDrill = 'Shield side entries', result = '84', cleanReps, mistakeCategory } = {}) {
   await openTab(user, 'Log')
   if (day) {
     await user.selectOptions(screen.getByLabelText('Training day required'), day)
   }
   await user.clear(screen.getByLabelText('Main drill required'))
   await user.type(screen.getByLabelText('Main drill required'), mainDrill)
+  if (mistakeCategory) {
+    await user.selectOptions(screen.getByLabelText('Primary mistake category required'), mistakeCategory)
+  }
   if (cleanReps !== undefined) {
     await user.clear(screen.getByLabelText('Clean reps'))
     await user.type(screen.getByLabelText('Clean reps'), String(cleanReps))
@@ -72,21 +75,23 @@ describe('app smoke and session logging flows', () => {
     expect(readStoredAppData().logs[0]).toMatchObject({
       mainDrill: 'Shield side entries',
       result: '84',
-      schemaVersion: 2,
+      schemaVersion: 3,
+      mistakeCategory: 'otherCustom',
     })
   })
 
-  it('creates a structured Olympic metric log from the phone flow', async () => {
+  it('creates a structured Olympic metric and mistake taxonomy log from the phone flow', async () => {
     const user = userEvent.setup()
     renderSeededApp()
 
-    await createLogThroughUi(user, { day: 'Monday', mainDrill: '4-quadrant pell', result: '90', cleanReps: 72 })
+    await createLogThroughUi(user, { day: 'Monday', mainDrill: '4-quadrant pell', result: '90', cleanReps: 72, mistakeCategory: 'formBreakdown' })
 
     await waitFor(() => expect(readStoredAppData().logs).toHaveLength(1))
     expect(readStoredAppData().logs[0]).toMatchObject({
       day: 'Monday',
       cleanReps: 72,
       metricType: 'Accuracy %',
+      mistakeCategory: 'formBreakdown',
     })
   })
 
@@ -119,6 +124,7 @@ describe('app smoke and session logging flows', () => {
     await user.type(within(dialog).getByLabelText('Result'), '91')
     await user.clear(within(dialog).getByLabelText('Clean reps'))
     await user.type(within(dialog).getByLabelText('Clean reps'), '66')
+    await user.selectOptions(within(dialog).getByLabelText('Primary mistake category'), 'badBlocks')
     await user.click(within(dialog).getByRole('button', { name: 'Save changes' }))
 
     await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Edit session log' })).not.toBeInTheDocument())
@@ -133,6 +139,7 @@ describe('app smoke and session logging flows', () => {
       expect(stored.duration).toBe(90)
       expect(stored.result).toBe('91')
       expect(stored.cleanReps).toBe(66)
+      expect(stored.mistakeCategory).toBe('badBlocks')
     })
   })
 
@@ -230,7 +237,7 @@ describe('backup and restore UI flows', () => {
     const textarea = screen.getByLabelText('Copyable backup JSON')
     expect(textarea).toBeInTheDocument()
     const backup = JSON.parse(textarea.value)
-    expect(backup.schemaVersion).toBe(3)
+    expect(backup.schemaVersion).toBe(4)
     expect(backup.logs).toHaveLength(1)
     expect(backup.logs[0].id).toBe('log_export')
     expect(backup.metadata.exportedAt).toEqual(expect.any(String))

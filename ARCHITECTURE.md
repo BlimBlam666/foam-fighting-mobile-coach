@@ -53,6 +53,7 @@ The main app controller. It owns React state and user actions:
 - creating session logs
 - editing/deleting session logs
 - structured Olympic metric fields on logs
+- controlled mistake taxonomy selection
 - onboarding state
 - active tab state
 - import/export UI state
@@ -102,7 +103,7 @@ Screen-level rendering only. These components receive state and callbacks from `
 
 Canonical client-side data contract and validation/migration logic. This file defines `AppData`, `SessionLog`, schema versions, strict parsing, legacy migration, and merge behavior.
 
-`AppData` schema version 3 adds structured optional Olympic metrics to `SessionLog` schema version 2 while preserving the generic `metricType/result` fallback path.
+`AppData` schema version 4 adds controlled mistake taxonomy IDs to `SessionLog` schema version 3 while preserving the generic `metricType/result` fallback path and free-text problem detail.
 
 `src/storage.js`
 
@@ -110,11 +111,11 @@ The localStorage boundary. Components and screens should not read or write raw `
 
 `src/metrics.js`
 
-Pure derived metrics from session logs. Program tracking prefers structured Olympic fields and falls back to numeric `metricType/result` values for older logs.
+Pure derived metrics from session logs. Program tracking prefers structured Olympic fields and falls back to numeric `metricType/result` values for older logs. Weakness targeting prefers the controlled mistake taxonomy and falls back to legacy free text when needed.
 
 `src/coachReview.js`
 
-Pure rule-based weekly review logic. It turns logs into trend summaries, weakness prioritization, coach verdicts, next-week focus, and Sunday review prompts. It does not use AI or hidden scoring.
+Pure rule-based weekly review logic. It turns logs into trend summaries, taxonomy-based weakness prioritization, coach verdicts, next-week focus, and Sunday review prompts. It does not use AI or hidden scoring.
 
 `src/trainingData.js`
 

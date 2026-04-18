@@ -78,7 +78,7 @@ export function CoachFooter({ sessions, weaknessTarget }) {
         <p className="eyebrow">{hasLogs ? 'Coach verdict' : 'Planned framework'}</p>
         <h4>{hasLogs ? 'Train the weakest variable next.' : 'Log sessions to unlock a verdict.'}</h4>
         <p>
-          {hasLogs ? 'Most repeated problem this week: ' : 'Your real weakness target appears after logging: '}
+          {hasLogs ? 'Most repeated mistake this week: ' : 'Your real weakness target appears after logging: '}
           <strong>{weaknessTarget}</strong>.
         </p>
       </div>

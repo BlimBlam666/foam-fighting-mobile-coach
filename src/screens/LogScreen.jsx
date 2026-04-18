@@ -1,5 +1,6 @@
 import React from 'react'
 import { storageStatusText } from '../app/appHelpers.js'
+import { MISTAKE_TAXONOMY, getMistakeDisplay } from '../dataModel.js'
 
 export function LogScreen({
   form,
@@ -62,6 +63,13 @@ export function LogScreen({
           <label>
             <span>Main drill required</span>
             <input value={form.mainDrill} onChange={(event) => onUpdateField('mainDrill', event.target.value)} placeholder="Main drill" />
+          </label>
+
+          <label>
+            <span>Primary mistake category required</span>
+            <select value={form.mistakeCategory} onChange={(event) => onUpdateField('mistakeCategory', event.target.value)}>
+              {MISTAKE_TAXONOMY.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+            </select>
           </label>
 
           {structuredFields.length > 0 && (
@@ -128,7 +136,7 @@ export function LogScreen({
                 <textarea value={form.win} onChange={(event) => onUpdateField('win', event.target.value)} />
               </label>
               <label>
-                <span>Biggest problem optional</span>
+                <span>Mistake detail optional</span>
                 <textarea value={form.problem} onChange={(event) => onUpdateField('problem', event.target.value)} />
               </label>
             </div>
@@ -208,7 +216,7 @@ export function LogScreen({
                 <span>Energy {log.energy} / Confidence {log.confidence}</span>
               </div>
               <p className="good-text"><strong>Win:</strong> {log.win}</p>
-              <p className="bad-text"><strong>Problem:</strong> {log.problem}</p>
+              <p className="bad-text"><strong>Mistake:</strong> {getMistakeDisplay(log)}{log.problem && log.problem !== 'No issue noted' ? ` / ${log.problem}` : ''}</p>
               <button className="inline-edit-btn" type="button">Edit log</button>
             </article>
           ))}
