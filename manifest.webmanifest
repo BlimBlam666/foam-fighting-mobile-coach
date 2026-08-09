@@ -1,0 +1,13 @@
+{
+  "name": "Academy Fighter Coach",
+  "short_name": "Fighter Coach",
+  "description": "Academy of Mercenary Arts deliberate-practice companion for foam fighters.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#d9c9a5",
+  "theme_color": "#1b241d",
+  "orientation": "portrait-primary",
+  "icons": [
+    {"src":"assets/academy-crest.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}
