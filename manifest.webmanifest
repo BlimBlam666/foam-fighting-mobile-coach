@@ -1,15 +1,26 @@
 {
-  "name": "Academy Fighter Coach",
+  "name": "Academy of Mercenary Arts — Fighter Coach",
   "short_name": "Fighter Coach",
-  "description": "Academy of Mercenary Arts deliberate-practice companion for foam fighters.",
-  "start_url": "./",
+  "description": "Deliberate foam-fighting practice: train, fight, reflect, adapt, and teach.",
+  "id": "/foam-fighting-mobile-coach/",
+  "start_url": "/foam-fighting-mobile-coach/",
+  "scope": "/foam-fighting-mobile-coach/",
   "display": "standalone",
-  "background_color": "#d9c9a5",
-  "theme_color": "#1b241d",
+  "background_color": "#eadfbe",
+  "theme_color": "#18231c",
   "orientation": "portrait-primary",
   "icons": [
-    {"src":"assets/icon-192.png","sizes":"192x192","type":"image/png"},
-    {"src":"assets/icon-512.png","sizes":"512x512","type":"image/png"},
-    {"src":"assets/academy-crest.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+    {
+      "src": "/foam-fighting-mobile-coach/assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/foam-fighting-mobile-coach/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }
