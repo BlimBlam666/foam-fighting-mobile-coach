@@ -10,23 +10,26 @@ A mobile-first deliberate-practice coach for foam fighters from the Academy of M
 ## Current features
 
 - 56 distinct Forged Sessions: eight across each of seven training domains
+- Explicit instructions at every stage: setup, numbered actions, work cycle, roles, coaching focus, and completion standard
 - Solo, Partner, and Warband adaptations
 - 20-, 30-, and 45-minute session plans
-- Four-phase practices: prepare, build, pressure-test, and reflect
-- Step timers, completion tracking, coaching cues, and success standards
-- Fight after-action reviews and next-session coaching
-- Seven-domain Warlord Path assessments
-- Chronicle, Training Marks, teaching records, and local progress history
+- Step timers, completion tracking, coaching cues, and reflections
+- Fight after-action reviews, Chronicle, Training Marks, teaching records, and Warlord Path assessments
 - Installable PWA with offline support
 
-## Training doctrine
+## Source doctrine
 
-The coach is built around a simple method: choose one narrow problem, practice it cleanly, add pressure without losing the purpose, and leave with one useful correction. The curriculum is grounded in Academy of Mercenary Arts course doctrine and SKBC training material.
+The supplied SKBC transcripts are the first authority for fighting technique and training method. Academy of Mercenary Arts doctrine supplies the timed session structure, progression, reflection, and clearly labeled extensions where the SKBC material does not prescribe an exact drill.
+
+Every session identifies its technical source in the app:
+
+- **SKBC-derived technique** means the named SKBC lesson governs the fighting concept.
+- **Academy extension** means the practice fills an Academy need while following SKBC's isolate, repeat, pressure-test, and review progression.
+
+## Repository layout
+
+The repository root contains the static GitHub Pages build. The readable source for this release is preserved under `source-v3/`.
 
 ## Data and privacy
 
 Training records remain in the browser storage of the device where they were created. There is no account, server database, or automatic cloud sync. Clearing browser data can remove those records.
-
-## GitHub Pages
-
-The published app is a static export in the repository root. `.nojekyll` allows GitHub Pages to serve the generated `_next` assets. The manifest and service worker are scoped to `/foam-fighting-mobile-coach/` so installation and offline use work from the project Pages URL.
